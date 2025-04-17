@@ -1,0 +1,281 @@
+---
+description: Rule: Project architecture overview document – Android Kotlin with Jetpack Compose
+globs:
+alwaysApply: false
+---
+
+# Project Overview Template
+This project is a modern Android application built with **Kotlin** and **Jetpack Compose**, following a **Clean Architecture** approach. The architecture emphasizes separation of concerns, modular code organization, and use of Android best practices (MVVM, dependency injection with Hilt, etc.) to create a scalable and maintainable codebase.
+
+## Project Structure
+
+The project is organized into multiple Gradle modules to enforce clear layering and feature separation:
+
+```
+ProjectName/
+├── app/                   - Android app module (application entry point, UI composition, navigation)
+├── domain/                - Domain layer (business logic: use cases, domain models, repository interfaces)
+├── data/                  - Data layer (implementation of repositories, network services, database access)
+├── core/                  - Core utilities (common code such as UI theming, extensions, constants) *optional*
+├── feature_login/         - Feature module: Login (UI screens and ViewModel for user authentication)
+├── feature_dashboard/     - Feature module: Dashboard (UI and logic for the dashboard feature)
+└── buildSrc/              - Build script module (Gradle Kotlin DSL for dependency versions and build logic)
+```
+
+Each feature of the app (e.g., login, dashboard, etc.) can be implemented in its own module (like `feature_login`, `feature_dashboard` above), which depends on the core, domain, and data modules. This modular structure improves encapsulation and build times, and makes it easier to scale the codebase.
+
+## Key Patterns & Concepts
+
+1. **Clean Architecture (Layered Architecture):** The codebase is divided into layers (presentation, domain, data) to separate concerns:
+
+    - **Presentation layer** (UI): Contains Android-specific code, Jetpack Compose UI, ViewModels. Depends on the domain layer.
+
+    - **Domain layer**: Contains enterprise logic, use case classes, and domain models. This layer is independent of any Android framework or library.
+
+    - **Data layer**: Handles data sources (network, database). Implements repositories defined in the domain layer. Depends on domain (for interfaces/models) but not on presentation. This separation ensures that domain logic is independent and easily testable, and that UI and data implementations can be changed with minimal impact on other layers.
+
+2. **MVVM (Model-View-ViewModel) Pattern:** The app follows MVVM for its presentation layer:
+
+    - **View (UI)**: Jetpack Compose Composables that display the data and send user events (clicks, inputs) to the ViewModel.
+
+    - **ViewModel**: Holds UI state and business logic for the UI. It consumes use cases from the domain layer or directly calls repositories, processes data, and exposes state (often via LiveData or Kotlin StateFlow).
+
+    - **Model**: Refers to the underlying data (often domain models or UI state data classes). The UI observes ViewModel state (implementing **unidirectional data flow** – state flows down from ViewModel to UI, and user events flow up from UI to ViewModel). This decouples the UI from logic and makes it testable.
+
+
+    ```kotlin
+    // Example ViewModel with StateFlow exposing UI state
+    @HiltViewModel
+    class LoginViewModel @Inject constructor(
+        private val userRepository: UserRepository
+    ) : ViewModel() {
+        // UI state exposed as StateFlow
+        private val _uiState = MutableStateFlow(LoginUiState())
+        val uiState: StateFlow<LoginUiState> = _uiState
+
+        fun login(email: String, password: String) {
+            viewModelScope.launch {
+                _uiState.value = _uiState.value.copy(isLoading = true)
+                val result = userRepository.login(email, password)
+                if (result.isSuccess) {
+                    _uiState.value = _uiState.value.copy(isLoading = false, user = result.getOrNull())
+                    // Trigger navigation to next screen, etc.
+                } else {
+                    _uiState.value = _uiState.value.copy(isLoading = false, error = "Login failed")
+                }
+            }
+        }
+    }
+    ```
+
+    In Compose, the ViewModel's `uiState` can be collected via `collectAsState()` in a composable to automatically recompose the UI on state changes.
+
+3. **Jetpack Compose (Declarative UI):** The entire UI is built using Jetpack Compose, Android's modern UI toolkit. Compose allows defining UI in Kotlin code with composable functions. It uses reactive paradigms:
+
+    - The UI is described in terms of state. When state updates (e.g., via a ViewModel), the Composables automatically recompose to reflect new data.
+
+    - Compose promotes UI that is stateless and event-driven. Any state is typically kept in ViewModel (or higher in the UI hierarchy) and provided to Composables.
+
+    - We use **Material Design 3** components via Compose Material libraries for a consistent look and feel. Compose simplifies UI development and removes the need for XML layouts, making the UI code more maintainable.
+
+4. **Dependency Injection with Hilt:** The project uses **Hilt** (based on Dagger) for dependency injection to manage object creation and scope:
+
+    - Hilt provides application-level singletons (e.g., Retrofit service, Room database, Repository instances) and simplifies providing these dependencies to Android components.
+
+    - ViewModels are annotated with `@HiltViewModel` and automatically provided with their dependencies (e.g., repositories) via `@Inject` constructors.
+
+    - Modules (with `@Module` and `@InstallIn` annotations) define how to provide implementations for interfaces (for example, which concrete `UserRepositoryImpl` to use for `UserRepository`). This pattern ensures loose coupling between components and allows easier testing (dependencies can be swapped with fakes in tests).
+
+5. **Coroutines and Flow:** Kotlin **coroutines** are used throughout the app for asynchronous operations (such as network calls or database access) without blocking threads. Key usages:
+
+    - `suspend` functions for performing tasks off the main thread (e.g., `userRepository.login()` is a suspend function).
+
+    - **Flow/StateFlow** for observing data streams (for example, reading from a Room database or emitting periodic updates). ViewModels collect Flows and convert them to LiveData or StateFlow for the UI to observe. This ensures a smooth user experience by keeping heavy operations off the UI thread and leveraging reactive updates to UI.
+
+6. **Repository Pattern:** The data layer uses repositories to abstract access to data sources.
+
+    - Repositories provide a clean API for the rest of the app (domain and presentation) to request or submit data.
+
+    - They coordinate between network sources (Retrofit APIs) and local sources (Room database or DataStore). For example, a repository might fetch from the network and cache the result in the database.
+
+    - The domain layer defines repository interfaces (e.g., `UserRepository`) and the data layer provides implementations (e.g., `UserRepositoryImpl`). This pattern promotes a single source of truth for data and makes it easy to modify data-fetching strategy (for instance, switch to a new API or modify caching logic) without affecting other layers.
+
+
+    ```kotlin
+    // Example Repository interface in domain layer
+    interface UserRepository {
+        suspend fun login(email: String, password: String): Result<User>
+        fun getUserProfile(id: Int): Flow<User>
+    }
+    ```
+
+    Repositories also make testing easier by allowing the use of fake implementations.
+
+7. **Navigation:** The app uses **Jetpack Navigation Compose** for screen navigation within a single-Activity architecture.
+
+    - A single `MainActivity` hosts a `NavHost` Composable. Different screens (Composables) are destinations in the navigation graph.
+
+    - Navigation actions (like moving from LoginScreen to HomeScreen) are triggered via the NavController (either directly in composables or via navigation events from the ViewModel).
+
+    - This centralized navigation approach makes it easy to manage back stack and passing arguments between screens. Each feature module can define its navigation destinations and the app module integrates them into the overall navigation graph.
+
+8. **Modular Architecture:** The project is structured into modules by feature and layer (as shown above). This means:
+
+    - **Feature Modules:** encapsulate UI and related logic for a section of the app (e.g., login, dashboard), allowing independent development and compile-time isolation.
+
+    - **Layer Modules:** separate domain and data logic so they can be developed and tested in isolation and shared across features.
+
+    - Module boundaries enforce dependency rules (e.g., a feature module can depend on domain to use use-cases, but domain does not depend on feature modules). This modularization improves scalability for large apps and can facilitate features like dynamic feature delivery if needed.
+
+
+## Domain Layer
+
+The **domain layer** contains the core business logic and models of the application. It is completely independent of Android frameworks and UI, making it portable and testable. Key contents of the domain layer include:
+
+- **Domain Models (Entities):** Data structures representing the core business objects (for example, `User`, `Order`, `Product`, etc., depending on the app). They are usually Kotlin data classes or classes with business logic methods. Domain models may enforce invariants or contain simple logic related to the data.
+
+- **Use Cases (Interactors):** Classes or functions that encapsulate a single unit of work or business action (e.g., `LoginUserUseCase`, `GetUserOrdersUseCase`). Use cases coordinate between repositories and domain models to execute application-specific logic. They provide a clear entry point for the domain logic that the UI or other layers can call.
+
+- **Repository Interfaces:** The domain layer defines interfaces for repositories (e.g., `UserRepository`, `OrderRepository`) that describe the operations possible, without specifying how they are implemented. This allows the domain to be ignorant of data details (API, database, etc.).
+
+
+For example, a simple domain entity and use case might look like:
+
+```kotlin
+// Domain model example
+data class Order(
+    val id: Int,
+    val items: List<Item>,
+    val totalAmount: Double
+) {
+    fun isLargeOrder(): Boolean = totalAmount > 1000.0
+}
+
+// Use case example
+class PlaceOrderUseCase(private val orderRepository: OrderRepository) {
+    suspend operator fun invoke(order: Order): Result<Unit> {
+        // Business logic (e.g., validation) can go here
+        return orderRepository.submitOrder(order)
+    }
+}
+```
+
+Domain models are used across the app (in UI and data layers) as the common language to represent things like users, orders, etc. By keeping this layer pure, we ensure that business rules remain consistent and testable.
+
+## Infrastructure Highlights (Data Layer)
+
+The **infrastructure (data layer)** provides concrete implementations for data handling, including networking, storage, and other platform integrations. Key components of this layer:
+
+1. **Networking (API clients):** Uses Retrofit (with OkHttp) to handle RESTful API calls to the backend server. For instance, an `AuthApiService` interface defines endpoints like `login()` and is implemented by Retrofit to perform network requests. The networking layer may include:
+
+    - Data Transfer Objects (DTOs) for parsing JSON responses (using a library like Moshi or Kotlinx Serialization).
+
+    - An OkHttp interceptor for logging or adding headers (e.g., authorization tokens) to requests. All network calls are made on background threads via coroutines, and results are returned as `Result` types or thrown exceptions to be caught in the repository.
+
+2. **Database (Room):** The app uses Room as the ORM for an SQLite database on the device:
+
+    - Entities are defined for each table (annotated with `@Entity`).
+
+    - Data Access Objects (DAOs, annotated with `@Dao`) define methods to query or update the database, returning Flow or suspend functions for asynchronous use.
+
+    - Room provides compile-time checked SQL queries and integrates with coroutines/Flow for reactive data changes. The database might store persistent data such as user info, cached API results for offline use, etc. If any schema change occurs, Room migrations are implemented to handle upgrades.
+
+3. **Local Storage:** In addition to Room, the project uses Jetpack DataStore for simple key-value storage needs (like user preferences or small pieces of data such as authentication tokens). DataStore is a replacement for SharedPreferences, providing an easier asynchronous API and type safety (with Proto DataStore for complex schemas if needed).
+
+4. **Repositories and Data Sources:** The data layer often implements a repository by combining multiple data sources:
+
+    - **Remote Data Source:** e.g., classes that call the Retrofit API services.
+
+    - **Local Data Source:** e.g., classes or DAO usage for reading/writing Room database. The repository (e.g., `UserRepositoryImpl`) decides when to fetch fresh data from network, when to use cached data from Room, and merges or transforms data into domain models. It handles errors from lower layers (network exceptions, etc.) and converts them into usable results for the domain/presentation layers.
+
+5. **Dependency Injection Configuration:** The data layer provides Hilt modules to wire up dependencies. For example, a `NetworkModule` provides the Retrofit instance and API service instances, a `DatabaseModule` provides the Room database and DAO instances, and a `RepositoryModule` binds each Repository interface to its implementation. This setup ensures that when a ViewModel requests a `UserRepository`, Hilt knows to supply a `UserRepositoryImpl` with the required dependencies (Retrofit service, DAO, etc.) already injected.
+
+6. **Other Services:** Any other platform integration is handled here. For example, if the app uses Firebase or Google Play services, those would be initialized in the infrastructure layer. If background tasks or scheduling is needed, WorkManager tasks would be defined in this layer. The goal is to keep such details out of the domain and presentation layers.
+
+
+Overall, the infrastructure layer is the only part of the app that directly communicates with external systems (network, disk, device services). By centralizing this, the rest of the app can treat data operations abstractly via repositories.
+
+## Key Flows
+
+Understanding how data and events flow through the app is crucial. Here are a couple of important flows in the application:
+
+1. **Data Loading Flow (Example - Fetching and Displaying Data):**
+
+    - **User Action:** The user navigates to a screen (e.g., a dashboard) that requires data. Compose will invoke the Composable for that screen.
+
+    - **ViewModel Request:** In the screen's ViewModel (initialized via Hilt), an initialization block or event handler triggers a use case or repository call to load the necessary data (for example, `getDashboardData()`).
+
+    - **Repository & Data Layer:** The repository method is called. It checks for data in the Room database (if caching is used) and decides whether to fetch from the remote API. Suppose it calls an API through Retrofit to get fresh data.
+
+    - **Data Retrieval:** The Retrofit call executes (on a background thread via coroutines). The response is parsed into DTOs and then mapped into domain model objects. The repository stores the new data in the Room database for caching (if applicable) and returns the domain models (or wraps them in a Result type).
+
+    - **ViewModel State Update:** The ViewModel receives the data from the repository call. It updates its state (e.g., a LiveData or StateFlow holding UI state) with the new content (and marks loading as finished).
+
+    - **UI Update:** The Compose UI observing the ViewModel’s state will automatically recompose to display the updated data. The user sees the new content on their screen. If there was an error, the ViewModel state would contain error info, and the UI would display an error message with a retry option.
+
+2. **User Interaction Flow (Example - Submitting an Action):**
+
+    - **User Action:** The user performs an action in the UI, such as tapping a "Submit" button in a form.
+
+    - **Event Handling:** The Composable handling that button click calls a method on its ViewModel (e.g., `viewModel.onSubmitClicked(inputData)`).
+
+    - **ViewModel Processing:** The ViewModel validates the input if needed, then calls the appropriate use case or repository function to perform the action (for instance, a `submitData()` use case).
+
+    - **Business Logic:** The use case (in domain layer) might apply business rules, then calls a repository method to actually perform the operation (network request or database write).
+
+    - **Result Handling:** Once the repository returns (say the network request succeeds), the ViewModel updates its state (e.g., set a flag that submission succeeded or navigate away).
+
+    - **UI Reaction:** Compose observes the state change and may show a success message or navigate to a different screen (navigation events can be handled via state or using the NavController).
+
+    - **Error Case:** If the operation fails, the ViewModel captures the error and updates state (such as an error message to show). The UI will recompose to display the error to the user, without freezing or crashing.
+
+
+These flows demonstrate the unidirectional movement of data: from user interactions to ViewModel (events up), then to domain/data layers and back to UI (data/state down). This makes the app's behavior predictable and easier to trace and debug.
+
+## Getting Started Tips
+
+- **Development Environment:** Use the latest stable **Android Studio** (Arctic Fox or newer) with Kotlin support to open this project. Make sure you have an Android SDK installed that meets the project's minimum SDK requirement (check `build.gradle` for `minSdkVersion`).
+
+- **Running the App:** After opening the project, let Gradle sync and build. You can run the app by selecting the `app` module configuration and clicking Run ( ▶ ). Deploy onto an emulator or physical device with an Android version ≥ the minimum SDK. The app module contains the `MainActivity` which sets up the Compose environment and navigation host.
+
+- **Explore the Codebase:** Start by reading through the **domain** module to understand the fundamental data models and use cases. Next, look at the **data** module to see how those domain abstractions are implemented (e.g., network calls, database). Finally, check the **app/feature** modules for the UI implementation. The `MainActivity` in the app module is a good entry point to see how the app launches and sets up navigation.
+
+- **Adding New Features:** Follow the existing architecture when adding features. For example, to add a "Settings" feature, you might create a new `feature_settings` module (or add to an existing module), add any new use cases or entities in the domain layer (if needed), implement new repository functions in the data layer (for persistence or network calls), and then create Compose UI screens and a ViewModel in the presentation layer. Leverage Hilt to inject any needed dependencies. Ensure to update the navigation graph (in the app module) to include new screens.
+
+- **Testing:** The project likely contains unit tests in the domain and data modules (for business logic and repository functions) and UI tests in the app module (or dedicated androidTest directories). You can run all tests with Gradle (`./gradlew test` for unit tests, `./gradlew connectedAndroidTest` for instrumented UI tests). When writing new code, also write corresponding tests. For instance, if you add a new repository method, create a test class in the data module to test its behavior (possibly using mock network responses or an in-memory database for Room).
+
+- **Code Style & Conventions:** Consistency is key. Use the existing code as a guideline for naming and organization. For example, follow the naming conventions for ViewModels (usually ending with `ViewModel`), use data classes for state containers, and place new files in the appropriate module and package. The project overview and architecture documentation (like this document) should be updated if major architectural changes are made.
+
+
+## Important Dependencies
+
+This project makes use of several important libraries and frameworks:
+
+- **Kotlin** – Primary programming language. Enables concise syntax and powerful features like coroutines.
+
+- **Kotlin Coroutines & Flow** – Used for asynchronous programming and stream of data; provides `suspend` functions and flow for reactive updates.
+
+- **Jetpack Compose** – Android’s modern UI toolkit for building declarative UIs without XML.
+
+- **AndroidX Lifecycle** – ViewModel and LiveData/StateFlow utilities to implement MVVM and handle lifecycles of UI components.
+
+- **Hilt (Dagger)** – Dependency Injection library to manage object creation and scope, reducing boilerplate in providing dependencies.
+
+- **Retrofit & OkHttp** – HTTP client and networking library for communicating with REST APIs.
+
+- **Moshi** (or **Kotlinx Serialization**) – JSON parsing library to serialize/deserialize network responses to Kotlin objects.
+
+- **Room** – ORM for SQLite database, providing a convenient API for data persistence and retrieval.
+
+- **DataStore (Preferences)** – Jetpack library for storing small amounts of data (like settings or tokens) asynchronously, replacing SharedPreferences.
+
+- **Navigation Compose** – AndroidX library for handling in-app navigation with Compose UI.
+
+- **Compose Material3** – UI components implementing Material Design 3 for a consistent design system.
+
+- **Testing Libraries** – JUnit4/JUnit5 for unit testing, AndroidX Test (Espresso and Compose UI Testing) for instrumented UI tests, and Mockito/Kotlin coroutines testing libraries for mocking and coroutine test utilities.
+
+
+All these dependencies are configured in Gradle. The `buildSrc` module or Gradle Kotlin DSL script manages versions for these libraries. Keeping them up-to-date will ensure the app remains aligned with the latest Android standards and improvements.
+
+

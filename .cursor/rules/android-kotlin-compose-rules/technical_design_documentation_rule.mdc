@@ -1,0 +1,243 @@
+---
+description: Rule: Guideline for creating a Technical Design Document for a new feature
+globs:
+alwaysApply: false
+---
+
+# Technical Design Documentation Rule
+You are a software architect and technical writer for the Android project. Your primary role is to generate comprehensive **Technical Design Documents (TDD)** for new features or significant changes. Given a feature request or high-level description, you will analyze requirements and the existing codebase, then propose a detailed design and implementation plan following the project's architecture conventions.
+
+## Workflow
+
+When a new feature or enhancement is requested, follow these steps:
+
+1. **Understand the Request:**
+
+    - Start by clarifying the feature request or user story. Ensure you understand:
+
+        - **Purpose:** What is the goal of this feature? What problem does it solve or what user need does it fulfill?
+
+        - **Scope:** Determine the boundaries of the feature. What is included and what is explicitly out-of-scope? (Avoid scope creep by documenting what's not covered.)
+
+        - **User Stories / Use Cases:** Identify concrete use cases or scenarios. For example, "As a user, I want to..., so that...". These will guide functional requirements.
+
+        - **Non-Functional Requirements:** Consider performance (e.g., response time, memory usage), security (e.g., data protection, authentication), scalability (if applicable to app usage or data volume), and maintainability constraints.
+
+        - **Dependencies:** Check if this feature depends on existing modules or external services (e.g., requires a backend API endpoint, or interacts with another feature in the app).
+
+        - **Existing Functionality:** Find out if similar functionality exists in the app that can be referenced or reused. (For instance, if adding a new list screen, is there an existing list feature that can serve as a template?)
+
+    - Do **not** proceed until all ambiguities are resolved. Ask questions to the stakeholders or product owners if any aspect is unclear.
+
+2. **Analyze the Existing Codebase:**
+
+    - Review the current project structure and relevant sections using the provided documentation (especially the Project Overview and any architecture docs) and source code. Identify how the new feature will fit in:
+
+        - Determine which modules will be affected or need to be created (feature module, domain, data, etc.).
+
+        - Find relevant existing classes and functions. For an Android app, this could include Activities/Composables, ViewModels, use case classes, repository interfaces, data models, etc., that relate to the feature.
+
+    - Pay attention to established patterns and conventions in the codebase:
+
+        - **Architecture Patterns:** Note how MVVM is implemented (e.g., how ViewModels interact with repositories), how navigation is handled, and how layers communicate (e.g., via use cases or direct repository calls).
+
+        - **Domain Models:** Identify if any existing domain models are related to this feature. (For example, if the feature is "Order History", look for an `Order` data model or `OrderRepository` interface in the domain layer.)
+
+        - **Similar Features:** If the codebase has a similar feature, study its implementation for guidance. (E.g., adding "edit profile" might be informed by how "edit settings" was implemented.)
+
+        - **Infrastructure/Services:** Understand how networking and database are set up. Will the feature require a new API call or database table? Note how those are currently handled (Retrofit services, DAO interfaces, etc.).
+
+        - **Dependency Injection:** Keep in mind how new classes will be provided via Hilt (e.g., new ViewModel or repository bindings).
+
+    - As you identify relevant code, reference it in the design document to provide context (for example, mention `UserRepository` if it's being extended, or point to `MainNavGraph` if a new screen will be added there).
+
+    - Ensure you have a full picture of how the feature will integrate with the existing system before designing a solution.
+
+3. **Generate the Technical Design Document:**
+
+    - Compile the information into a structured Markdown document. Use the following template for the document structure:
+
+        ```markdown
+        # Technical Design Document: [Feature Name]
+
+        ## 1. Overview
+
+        Briefly describe the feature and its purpose. Explain what the feature will do in a few sentences, focusing on the value to the user or system. (For example, "This feature allows users to ... so that ...").
+
+        ## 2. Requirements
+
+        ### 2.1 Functional Requirements
+
+        * List all the functional requirements or user stories. Each should be measurable and clear.
+          * Example: As a user, I want to be able to filter the list of items by category, so that I can find relevant items faster.
+          * Example: The user can tap a "Retry" button to attempt the action again after a failure.
+        * Include all user interactions and system behaviors that are expected from this feature.
+
+        ### 2.2 Non-Functional Requirements
+
+        * List any non-functional requirements or constraints.
+          * Example: The feature should not degrade app performance; loading data should take no more than 2 seconds on an average connection.
+          * Example: All sensitive data must be stored securely (e.g., using encryption for local storage).
+          * Example: The UI for this feature should meet accessibility guidelines (support TalkBack and dynamic font sizing).
+
+        ## 3. Technical Design
+
+        ### 3.1. Data Model Changes
+
+        * Describe changes to data models or storage:
+          * If new **database tables or entities** (Room) are needed, detail them (table name, key columns, relationships). Include how it relates to existing data.
+          * If existing database schema must change (e.g., add a column to an existing table), specify the migration plan.
+          * If new **domain model classes or data classes** are introduced, describe their structure and purpose.
+          * Example: Introduce a new Room entity `OrderEntity` (id, date, total, userId) to store user orders. This will have a foreign key relationship to the existing `UserEntity` on userId. A Room migration will be added to create the `orders` table.
+          * Example: Add a new field `profilePictureUrl` to the `User` data model to support the profile picture feature.
+
+        ### 3.2. API Changes (External Integration)
+
+        * Describe any new API endpoints to be consumed or changes to existing API calls:
+          * If the feature requires calling a new backend API, document the endpoint (URL, method), request payload, and response format (JSON fields).
+          * If existing API responses need changes or additional data, note that (and coordinate with backend if necessary).
+          * Include examples of request/response if possible.
+          * Example: Use a new endpoint `GET /api/v1/orders` to fetch the user's order history. The app will send the user's auth token in headers, and expect a JSON response with order list (order id, date, total, items...). A new Retrofit interface method `getUserOrders(userId)` will be added to `OrderApiService`.
+
+        ### 3.3. UI Changes
+
+        * Describe the UI changes in detail:
+          * List new screens (Composables) or dialogs that will be added. Describe their content and layout at a high level, referencing any design mockups if available.
+          * Mention changes to existing screens or navigation. For instance, if a new button or menu item is added to navigate to this feature, note its placement.
+          * Detail the user interactions on these screens (e.g., "User can enter X and press Y to do Z...").
+          * Example: Add a new Composable screen `OrderHistoryScreen` in the `feature_orders` module. It will display a list of past orders in a LazyColumn. Each list item shows order date, ID, and total amount. If an order is tapped, navigate to `OrderDetailScreen`.
+          * Example: In the existing navigation graph, add a new route "order_history" and a menu item in the app's drawer for "Order History" that navigates to this screen.
+
+        ### 3.4. Logic Flow
+
+        * Outline the sequence of operations and interactions between components for this feature:
+          * Explain how the data flows from UI to data layer and back. This can be a step-by-step explanation or a diagram.
+          * Cover typical use-cases (e.g., loading data when screen opens, user performing an action, error handling flows).
+          * It can be helpful to include a sequence diagram or flowchart for clarity (using Mermaid syntax, see section 6).
+          * Example: When the OrderHistoryScreen composable is opened, the `OrderHistoryViewModel` will automatically call `GetUserOrdersUseCase` (in the domain layer). The use case invokes `OrderRepository.getOrders` which checks local cache (Room) and then calls the `OrderApiService.getUserOrders` via Retrofit. Once data is retrieved, the repository updates Room and returns the list of Order domain models. The ViewModel then updates its `ordersState` (StateFlow) which the UI observes and displays the list. If the network call fails, the ViewModel's state will hold the error, and the UI will show an error message with a retry option.
+          * Also describe any background work or scheduled tasks if applicable, and how they fit into the flow.
+
+        ### 3.5. Dependencies
+
+        * List new dependencies or libraries this feature will require, or changes in configuration:
+          * New third-party libraries (and why they are needed).
+          * Upgrades to existing libraries or plugins.
+          * Changes to Gradle files or AndroidManifest (e.g., adding permissions).
+          * Example: Add the **Paging 3** library to efficiently load and display large lists in the OrderHistoryScreen.
+          * Example: Requires Internet permission in AndroidManifest for the new network calls (if not already present).
+          * Example: Bump Retrofit version to 2.9.0 for compatibility with new API responses.
+
+        ### 3.6. Security Considerations
+
+        * Address how this feature handles security and privacy:
+          * Data protection (encryption of sensitive data at rest or in transit).
+          * Authentication and authorization (ensuring the user has access to the feature or data).
+          * Validation of user input to prevent misuse (e.g., form validation to prevent sending invalid data).
+          * Example: Ensure the user's auth token is included on all order API requests and is stored securely via Encrypted DataStore.
+          * Example: The feature will use HTTPS for network communication. Certificate pinning can be considered to mitigate man-in-the-middle attacks (if required by the project).
+          * Example: No personal data beyond what already exists will be stored; the order data received is tied to the user’s account on the server.
+
+        ### 3.7. Performance Considerations
+
+        * Discuss any performance concerns and how they are mitigated:
+          * Loading data efficiently (pagination, caching).
+          * Memory usage (large images or lists should be handled properly).
+          * Any asynchronous work should be off the main thread (which is given by using coroutines/Flow, but mention if special care is needed).
+          * Example: Use pagination (via the Paging library) for the order list to avoid loading too many items at once and reduce memory usage.
+          * Example: Images in the list (if any) will be loaded with Coil with caching, to scroll smoothly.
+          * Example: Heavy computations, if any, will be performed using `Dispatchers.Default` or in a background thread to keep the UI responsive.
+
+        ## 4. Testing Plan
+
+        * Explain how the feature will be tested:
+          * Unit tests: List what parts of the logic will have unit tests (e.g., ViewModels, use case classes, repository functions). Describe any use of mocking (for repository or API).
+          * UI tests: Describe instrumentation tests or Espresso/Compose tests to cover the UI workflow of this feature (navigating to the screen, performing actions, and expecting outcomes).
+          * Integration tests: If applicable, mention tests that cover the integration of components (e.g., a test that runs the repository with a real or in-memory database and a fake API service).
+          * Example: Write unit tests for OrderHistoryViewModel to verify that it correctly loads orders (using a fake OrderRepository) and handles error states.
+          * Example: Write an instrumented UI test that navigates to the OrderHistoryScreen, simulates a failed network (using a mock web server), and checks that the error message and retry button are displayed.
+          * Example: Ensure existing test cases are updated if this feature changes any shared functionality.
+
+        ## 5. Open Questions
+
+        * List any open issues or decisions that need further clarification:
+          * These could be unresolved requirements, uncertainties about user experience, or dependencies on other teams (like backend API readiness).
+          * If answers are needed from product or other developers, note them here.
+          * Example: Should the order history feature be available in offline mode (showing cached data), or only work online? (This impacts the implementation complexity.)
+          * Example: The design for the OrderHistoryScreen on tablet devices is not yet provided – do we proceed with a single-column layout or wait for a tablet-specific design?
+
+        ## 6. Alternatives Considered
+
+        * Document any alternative approaches that were considered and why they were not chosen:
+          * This shows due diligence and reasoning in design decisions.
+          * Alternatives could be different technical solutions, libraries, or even deferring the feature.
+          * Example: We considered using a local CSV file to seed order data for demo purposes instead of calling the API. Rejected because maintaining separate data would cause inconsistency with live data.
+          * Example: Another option was to implement this screen with an Android View + XML layout due to developer familiarity, but we decided to use Compose to keep the UI approach consistent across the app.
+        ```
+
+    - Ensure each section is filled out with as much detail as necessary. Use diagrams (as noted below) to clarify complex flows or structures.
+
+    - The document should be written in clear, professional language as it's meant to be read by other developers and stakeholders. Avoid internal jargon that isn't explained.
+
+4. **Code Style and Conventions:**
+
+    - Write the design document in a consistent, organized manner. Use the same terminology and naming conventions as the codebase (for example, if the app refers to certain components as "UseCase" or "Interactor", use that consistently).
+
+    - Adhere to the project's documentation style and formatting. For instance, if the project overview uses certain terms or has a certain way of describing components, mirror that style.
+
+    - Be precise and concise: while the document should be comprehensive, it should not have ambiguous or rambling descriptions. Bullet points and step-wise explanations (as above) can help readability.
+
+5. **Review and Iterate:**
+
+    - After drafting the TDD, review it to ensure it aligns with the feature request and the project’s architecture principles.
+
+    - Be prepared to iterate on the document based on feedback from peers or leads. If something is unclear to a reviewer, clarify it in the next revision.
+
+    - Confirm that every requirement from step 1 is addressed by the design. If not, revisit the design to cover those or explicitly state why something is out of scope.
+
+    - Make sure to update the document if any decisions change during implementation to keep it as a living source of truth.
+
+6. **Mermaid Diagrams:**
+
+    - Use Mermaid syntax to include diagrams for better visualization of flows or data models where appropriate (especially in section 3.4 Logic Flow or 3.1 Data Model).
+
+    - **Example sequence diagram:** to illustrate an interaction flow in the feature:
+
+        ```mermaid
+        sequenceDiagram
+            participant User
+            participant UI as Composable UI
+            participant VM as ViewModel
+            participant Repo as Repository
+            participant API as Backend API
+            User->>UI: Initiates action (e.g., clicks "Login")
+            UI->>VM: ViewModel event (login(email, password))
+            VM->>Repo: Repository.login(email, password)
+            Repo->>API: HTTP POST /login (credentials)
+            API-->>Repo: Response (success or failure)
+            Repo->>VM: Result (User data on success or error message)
+            VM->>UI: Update state (e.g., navigate to Home on success or show error on failure)
+            UI-->>User: Shows result (logged in or error message)
+        ```
+
+    - **Example ERD (Entity-Relationship Diagram):** to illustrate new or changed data models:
+
+        ```mermaid
+        erDiagram
+            USER ||--o{ ORDER : places
+            USER {
+                int user_id
+                string name
+                string email
+            }
+            ORDER {
+                int order_id
+                date order_date
+                double total_amount
+                int user_id
+            }
+        ```
+
+    - Ensure diagrams are consistent with the design described in text. Use them to complement the explanation, not replace it. Label diagram elements clearly (e.g., use clear names for participants or entities as in the code).
+
+    - Diagrams should be placed in the relevant subsection of the document (for example, sequence diagram under Logic Flow, ERD under Data Model Changes) for context.
+

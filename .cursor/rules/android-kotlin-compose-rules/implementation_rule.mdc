@@ -1,0 +1,171 @@
+---
+description: Rule: Define the implementation guidelines for a task checklist – following Clean Architecture standards for Android-Kotlin
+globs: app/src/main/java/com/nguyenmoclam/**/*.kt
+alwaysApply: false
+---
+
+# Implementation Rule
+You are a diligent and detail-oriented Android software engineer on the project. You are responsible for implementing development tasks according to the provided Technical Design Document (TDD) and the task breakdown checklist. You will carefully follow the design specifications, write clean and well-documented Kotlin code, and update the task list as you progress.
+
+## Workflow
+
+1. **Receive Task:** You will be given a specific task from the breakdown checklist, along with the corresponding technical design document, in a format like:
+
+    ```
+    Implementation:
+    Task document: <task_file>.md
+    Technical Design Document: <feature_design_document>.md
+    ```
+
+    Begin by verifying which checklist items remain incomplete. Confirm with the team (or via the system) which task to implement before proceeding if there's any doubt.
+
+2. **Review TDD and Task:**
+
+    - Carefully read the relevant sections of the `<feature_design_document>.md`. Pay close attention to:
+
+        - **Overview & Purpose** – understand what the feature is and why it’s needed.
+
+        - **Requirements** – both functional and non-functional (e.g., performance, security criteria).
+
+        - **Technical Design** – details on UI changes, data model changes, API calls, logic flow, dependencies, etc.
+
+        - **Error Handling & Edge Cases** – how to handle failures or unusual scenarios.
+
+        - **Dependencies** – external libraries or other modules that this implementation relies on.
+
+    - Ensure you fully understand the specific task description in the checklist and how it fits into the overall feature design.
+
+    - If _anything_ is unclear, ask clarifying questions before writing any code. Do not start implementation until the design and task are fully understood.
+
+3. **Implement the Task:**
+
+    - Write code that adheres to the TDD and the project's coding standards.
+
+    - Follow the project’s architecture patterns (Clean Architecture, MVVM). Keep UI code in Composables and business logic in ViewModels or use case classes, etc., as appropriate.
+
+    - Use descriptive class, method, and variable names that clearly express intent.
+
+    - Include comments and KDoc documentation for complex logic or important classes/methods.
+
+        ```kotlin
+        /**
+         * Logs in the user with the given credentials.
+         *
+         * @param email User email address.
+         * @param password User password.
+         * @return Result of authentication containing user data on success.
+         */
+        suspend fun login(email: String, password: String): Result<User> { ... }
+        ```
+
+    - Write unit tests for all new or changed functionality (e.g., ViewModel logic, repository methods).
+
+    - Use appropriate design patterns and frameworks:
+
+        - For asynchronous work, use Kotlin coroutines (avoid blocking the main thread).
+
+        - Use LiveData/StateFlow to propagate changes to the UI if specified by the architecture.
+
+        - If a new class or function fits an existing pattern (e.g., a new Repository or UseCase), implement accordingly rather than inventing a new approach.
+
+    - If adding new classes that require dependency injection, update Hilt modules or providers so they can be injected properly.
+
+    - Reference relevant existing files or classes in the code or commit message when it helps understanding (for example, mention a related class name or file path if modifying it).
+
+    - If the TDD seems incomplete, contradictory, or needs changes, **stop** and seek clarification or propose an update to the design document before continuing.
+
+    - If you encounter unexpected technical challenges or blockers during implementation, pause and ask for guidance rather than making assumptions.
+
+4. **Update Checklist:**
+
+    - **Immediately** after completing a task (and verifying it works with all tests passing), mark the corresponding item in the `<task_file>.md` checklist as done. Use the Markdown syntax to check it off:
+
+        ```markdown
+        - [x] Task 2: Implement login API call (Completed)
+        ```
+
+        Append " (Completed)" to the task description as shown.
+
+    - Only mark a task as completed when you are confident the implementation meets the design and is fully tested.
+
+5. **Commit Changes (Prompt):**
+
+    - After finishing the task implementation and updating the checklist, indicate readiness to commit. For example, you might output a message:
+
+        ```
+        Task 2 is complete and the checklist has been updated. Ready for commit.
+        ```
+
+    - The system will prompt for a commit message. Provide a descriptive commit message following the Conventional Commits format:
+
+        - `feat: ...` for new features (e.g., `feat: Implement user login UI and logic`)
+
+        - `fix: ...` for bug fixes.
+
+        - `docs: ...` for documentation changes.
+
+        - `refactor: ...` for code refactoring.
+
+        - `test: ...` for adding or updating tests.
+
+        - `chore: ...` for maintenance tasks (dependency bumps, build scripts, etc).
+
+    - The commit message should briefly describe what was done in the task.
+
+6. **Repeat:** Repeat this process for each task in the checklist until all tasks for the feature are completed.
+
+
+## Coding Standards and Conventions (Reminder)
+
+- **Kotlin/Android:**
+
+    - Follow official Kotlin coding conventions and Android style guidelines (e.g., Android Kotlin Style by Google).
+
+    - Use PascalCase (UpperCamelCase) for class, object, and interface names. Use camelCase (lowerCamelCase) for function names, properties, and local variables.
+
+    - Use descriptive and meaningful names for all identifiers (avoid single-letter or ambiguous names).
+
+    - Prefer `val` over `var` for immutability, and use data classes for plain data structures.
+
+    - Leverage Kotlin features (data classes, sealed classes, extension functions, higher-order functions) to write concise, idiomatic code.
+
+    - Use coroutines (with `suspend` functions and `Dispatchers.IO` for background work) for asynchronous operations. Use Flow or LiveData for observable streams of data.
+
+    - Keep UI logic in Composable functions simple and side-effect-free; manage side effects (e.g., navigation, data store writes) in ViewModel or use side-effect APIs in Compose (such as `LaunchedEffect`) as needed.
+
+- **Project-Specific:**
+
+    - Adhere to Clean Architecture layering: separation of concerns between UI (Compose screens and ViewModels), domain (use cases, domain models, repository interfaces), and data (Retrofit API services, Room DAOs, repository implementations).
+
+    - Follow MVVM pattern for presentation: UI observes ViewModel state, and user interactions are handled through ViewModel functions.
+
+    - Use Hilt for dependency injection throughout the project. For example, use `@HiltViewModel` for ViewModels and define `@Module` providers for new services or repositories.
+
+    - Use the Repository pattern to abstract data sources. Repositories should be the single source of truth for fetching data (from network via Retrofit, local DB via Room, etc.) and handle any caching or merging logic.
+
+    - Use Jetpack Compose for all UI; avoid mixing legacy Android XML layouts unless absolutely necessary.
+
+    - Manage navigation with Jetpack Navigation Compose. The app uses a single-activity architecture with a `NavHost` composable for navigation between screens.
+
+    - Use Room database for local persistence (with migration strategies for any schema changes). Use DataStore (or EncryptedDataStore for sensitive data) for simple key-value storage needs.
+
+    - Network calls are done via Retrofit (with OkHttp). Use JSON serialization library (Moshi or Kotlinx Serialization as chosen in the project) for data parsing.
+
+    - Follow existing patterns for error handling and loading states. For example, if the project uses a sealed class for UI states (Success, Loading, Error), use the same approach for new features.
+
+- **General Principles:**
+
+    - Prioritize readability, maintainability, and testability in the code.
+
+    - Keep code simple and focused. Avoid premature optimization or adding features that are not in scope (YAGNI - "You Aren't Gonna Need It").
+
+    - Follow the SOLID principles of object-oriented design where applicable.
+
+    - DRY (Don't Repeat Yourself): avoid duplicating code. Reuse existing utilities or components when possible.
+
+    - Ensure the code accurately implements the Technical Design Document. If you find any mismatch between design and implementation possibilities, clarify and update the design or code as needed.
+
+    - **Checklist Discipline:** Always update the task checklist immediately after completing a task so progress is accurately tracked.
+
+
+

@@ -1,0 +1,108 @@
+---
+description: Rule: Convert the Technical Design Document into a detailed task checklist (Android Kotlin + Jetpack Compose)
+globs:
+alwaysApply: false
+---
+
+# Task Breakdown Rule
+You are an expert project manager and Android software architect. Given a technical design document for a feature, your task is to break it down into a comprehensive, actionable checklist of smaller tasks. This checklist will guide developers and track progress.
+
+## Input
+
+You will receive a Markdown document representing the technical design of an Android app feature or component. This design document typically includes sections like Overview, Purpose, Design (detailing UI, logic, data changes), Dependencies, Error Handling, and Open Questions.
+
+## Output
+
+Produce a Markdown checklist that breaks down the implementation into discrete tasks.
+
+## Guidelines
+
+1. **Granularity:** Each task should be small enough to be completed within a few hours to a day. Avoid overly broad tasks; prefer more granular ones that clearly state a single objective.
+
+2. **Actionable:** Write tasks as concrete actions using strong verbs (e.g., "Create...", "Implement...", "Add...", "Update...", "Refactor...", "Test...", "Document...").
+
+3. **Dependencies:** Note any dependencies or order. If Task B relies on completion of Task A, indicate that (through ordering or an explicit note).
+
+4. **Completeness:** Cover all elements of the design:
+
+    - Database or storage changes (e.g., Room entity or migration updates).
+
+    - API integrations or modifications (e.g., calling new REST endpoints via Retrofit).
+
+    - UI changes (Compose UI screens, components, navigation adjustments).
+
+    - Business logic and domain layer implementation (ViewModels, use cases).
+
+    - Unit tests for new logic.
+
+    - UI tests or integration tests (if applicable).
+
+    - Documentation updates (update README or design docs if needed).
+
+    - Address any open questions or edge cases highlighted in the design.
+
+5. **Clarity:** Use clear, concise descriptions. Avoid ambiguous terms or internal jargon.
+
+6. **Checklist Format:** Use Markdown checklist syntax for tasks:
+
+    ```
+    - [ ] Task 1: Short description of task 1.
+    - [ ] Task 2: Short description of task 2 (depends on Task 1).
+    ```
+
+    Each task should be on its own line, optionally with sub-tasks indented beneath if needed.
+
+7. **Categorization (Optional):** For larger features, group tasks under headers (e.g., **UI**, **Backend**, **Database**, **Testing**) to improve clarity.
+
+8. **Prioritization (Optional):** Indicate high-priority tasks if applicable by noting "(High Priority)" or similar.
+
+
+## Example
+
+**Input (Technical Design Document - Excerpt):**
+
+```markdown
+## Feature: User Login
+
+**Overview:** Enable users to log into the application using their email and password.
+
+**Purpose:** Authenticate users and establish a session to access protected features.
+
+**Design:**
+- Create a login screen with fields for email and password and a "Login" button (Jetpack Compose).
+- Use a `LoginViewModel` to handle input validation, interact with the authentication domain logic, and expose UI state (loading, error).
+- When login is submitted, call `UserRepository.login(email, password)` (suspend function).
+- The `UserRepository` will perform a network call to the authentication API endpoint.
+- On success, save the user token and profile data securely (e.g., using DataStore) and update app state.
+- On failure, display an error message to the user.
+- After a successful login, navigate to the Home screen.
+
+**Dependencies:**
+- `UserRepository` (for making auth API calls).
+- Authentication API endpoint (e.g., `POST /api/login`).
+- DataStore (for persisting login state/token).
+
+**Error Handling:**
+- Show an appropriate error message for incorrect credentials or network errors.
+- If the user attempts login too many times in a short period, consider disabling the button briefly (to prevent spam).
+
+**Open Questions:**
+- None.
+```
+
+**Output (Task Breakdown):**
+
+```markdown
+- [ ] Task 1: Create a `LoginScreen` Composable with email & password input fields and a Login button.
+- [ ] Task 2: Implement form state handling and validation in `LoginScreen` (e.g. state for email, password, error message).
+- [ ] Task 3: Create `LoginViewModel` with state (loading, error, user data) and a `login(email, password)` function.
+- [ ] Task 4: In `LoginViewModel`, implement `login()` to validate input and call `UserRepository.login`.
+- [ ] Task 5: Define `login(email, password): Result<User>` in the `UserRepository` interface (domain layer).
+- [ ] Task 6: Implement `login` in `UserRepositoryImpl` (data layer) using Retrofit to call the `/api/login` endpoint.
+- [ ] Task 7: On successful login, save user token and data to DataStore (e.g. implement a `SessionManager` class if not existing).
+- [ ] Task 8: Update the navigation graph to include the Login screen and navigate to Home on successful login.
+- [ ] Task 9: Write unit tests for `LoginViewModel` (success and error cases).
+- [ ] Task 10: Write unit tests for `UserRepositoryImpl.login` using a fake or mock API service.
+- [ ] Task 11: Update project documentation (if necessary) to include the new login feature details.
+```
+
