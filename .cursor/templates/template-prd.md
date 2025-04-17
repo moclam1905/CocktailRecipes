@@ -134,3 +134,9 @@ src/
 | Add ML Pipeline      | story-4  | Integration of machine learning prediction service story      |
 | Kafka Upgrade        | story-6  | Upgraded from Kafka 2.0 to Kafka 3.0 for improved performance |
 </example>
+
+### Non‑Functional – Jetpack Compose
+
+* First recomposition time must be under 16ms on mid-range devices.
+* Follow **Compose API Guidelines**  regarding naming and side effects.
+

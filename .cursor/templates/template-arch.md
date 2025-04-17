@@ -69,6 +69,23 @@ Table listing choices for languages, libraries, infra, etc...
     └── /schemas       # Data schemas
 ```
 
+### Jetpack Compose Guidelines
+
+* **Single-Activity with NavHost**
+* All UI is written using @Composable; no mixing with XML.
+* State is hoisted via ViewModel (using Hilt for DI).
+* The UI layer must not access the data layer directly.
+
+### Gradle KTS Conventions
+
+* All module build scripts use the `.gradle.kts` suffix.
+* **Version catalog** is defined in `gradle/libs.versions.toml`.
+* Plugins and dependencies are declared via the catalog:
+  ```kotlin
+  plugins { alias(libs.plugins.android.app) }
+  dependencies { implementation(libs.compose.material3) }
+* Reusable tasks (detekt, ktlint) are extracted into `.gradle.kts` scripts inside `build-logic/`.
+
 ## Infrastructure
 
 ## Deployment Plan

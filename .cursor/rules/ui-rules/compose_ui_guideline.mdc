@@ -1,0 +1,70 @@
+---
+description: UI Guideline: Jetpack Compose coding standards & component conventions
+globs: app/src/main/java/com/nguyenmoclam/cocktailrecipes/ui/**/*.kt
+alwaysApply: false
+
+---
+
+# Compose UI Guideline– Android Kotlin Jetpack Compose
+
+## 1. Naming Conventions
+
+- **Stateless vs Stateful**
+  - **Stateless**: `@Composable fun ItemCard(item: Item, onClick: () -> Unit)` – displays the passed-in data without holding state.
+  - **Stateful**: append `WithState()` or define inside a `Defaults` class (based on API guideline).
+- **Screens**: end with **`Screen`** (e.g., `HomeScreen`, `DetailScreen`).
+- **Section/Container**: use suffix **`Section`** or **`Container`** for layout-only groupings.
+- **Callback parameters** should always be placed last (per Kotlin coding style).
+
+## 2. Function Signature
+
+```kotlin
+@Composable
+fun FancyButton(
+    text: String,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+)
+```
+
+- **`modifier`** should come first after data-state params to enable readable chaining.
+- Avoid nullable parameters that mean “off” – provide meaningful default values instead.
+
+## 3. Stable State & Recomposition
+
+- Composables must be **idempotent** – same input produces same UI.
+- Inputs should be **immutable** or marked with `@Stable`. If passing `MutableState`, wrap with `remember { mutableStateOf(...) }`.
+- Use `rememberSaveable` for states that need to survive configuration changes.
+
+## 4. Modifier Order
+
+1. **Layout** (`fillMaxWidth`, `size`)
+2. **Appearance** (`background`, `border`)
+3. **Interaction** (`clickable`, `pointerInput`)
+4. **Animation** (`graphicsLayer`, `animate...`)
+
+> Follows Google’s recommended modifier ordering to prevent hit-box bugs.
+
+## 5. Accessibility
+
+- Always assign `contentDescription` to images.
+- Use `semantics {}` to override roles when needed.
+- Use `mergeDescendants = true` to combine children if too verbose for screen readers.
+
+## 6. Preview & Theming
+
+- Every public composable must have at least one **`@Preview`** in the same file with default theme.
+- Use `MaterialTheme.colorScheme` and `MaterialTheme.typography` for design tokens.
+- Avoid hard-coded `dp/sp` values – prefer `dimensionResource` for design specs.
+
+## 7. Parameter Overload & Default Values
+
+- For simple boolean flags, prefer **separate composables** (e.g., `FilledButton`, `OutlinedButton`) over a `filled: Boolean` flag.
+- Default values should reflect design specs (e.g., `elevation = ButtonDefaults.elevatedButtonElevation()`).
+
+> **Violating this guideline** should trigger AI warnings or refactoring suggestions during code reviews.
+
+---
+
+Nếu bạn cần mình xuất bản guideline này dưới dạng `.mdc` để dùng trong Cursor AI hay format Markdown đơn giản thì cứ nói nhé.
