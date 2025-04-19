@@ -84,6 +84,8 @@ Table listing choices for languages, libraries, infra, etc...
   ```kotlin
   plugins { alias(libs.plugins.android.app) }
   dependencies { implementation(libs.compose.material3) }
+  ```
+  
 * Reusable tasks (detekt, ktlint) are extracted into `.gradle.kts` scripts inside `build-logic/`.
 
 ## Infrastructure

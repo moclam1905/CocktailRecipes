@@ -1,0 +1,60 @@
+---
+description: Auto‑break high‑level tasks into granular subtasks with effort estimates
+globs:
+  - memory-bank/tasks.md
+alwaysApply: true
+---
+
+# Task Breakdown Rule
+
+## Critical Rules
+
+- Identify high-level bullet points in tasks.md that lack subtasks
+- Break down each high-level task into 3-5 specific, actionable subtasks
+- Add effort estimates (in hours) for each subtask in parentheses
+- Ensure subtasks align with the architectural decisions in techContext.md
+- Maintain the existing markdown format with proper indentation
+- Do not modify completed tasks (marked with [x])
+- Update tasks.md in-place with the new breakdown
+- Respect dependencies between tasks (complete prerequisite tasks first)
+- Use consistent terminology across all subtasks
+
+## Examples
+
+<example>
+Before:
+```md
+## Phase 1: Project Setup & Architecture
+- [x] Create initial project structure
+- [ ] Set up project architecture (MVVM)
+```
+
+After:
+```md
+## Phase 1: Project Setup & Architecture
+- [x] Create initial project structure
+- [ ] Set up project architecture (MVVM)
+  - [ ] Create data, domain, and presentation layer packages (1h)
+  - [ ] Implement base ViewModel class with error handling (2h)
+  - [ ] Set up dependency injection structure (2h)
+  - [ ] Create repository interfaces (1h)
+```
+</example>
+
+<example type="invalid">
+Before:
+```md
+## Phase 1: Project Setup & Architecture
+- [ ] Set up project architecture (MVVM)
+```
+
+After:
+```md
+## Phase 1: Project Setup & Architecture
+- [ ] Implement architecture
+  - [ ] Do the MVVM thing
+  - [ ] Create some files
+```
+
+The breakdown is too vague and doesn't provide specific, actionable subtasks with effort estimates.
+</example> 

@@ -9,35 +9,65 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+// Cocktail-themed light color scheme
+private val LightColorScheme = lightColorScheme(
+    primary = Primary,
+    onPrimary = OnPrimary,
+    primaryContainer = Primary.copy(alpha = 0.15f),
+    onPrimaryContainer = Primary,
+    secondary = Secondary,
+    onSecondary = OnSecondary,
+    secondaryContainer = Secondary.copy(alpha = 0.15f),
+    onSecondaryContainer = Secondary,
+    tertiary = Tertiary,
+    onTertiary = OnTertiary,
+    tertiaryContainer = Tertiary.copy(alpha = 0.15f),
+    onTertiaryContainer = Tertiary,
+    background = Background,
+    onBackground = OnBackground,
+    surface = Surface,
+    onSurface = OnSurface,
+    surfaceVariant = Surface.copy(alpha = 0.7f),
+    onSurfaceVariant = OnSurface.copy(alpha = 0.7f),
+    error = Secondary,
+    errorContainer = Secondary.copy(alpha = 0.15f),
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+// Cocktail-themed dark color scheme
+private val DarkColorScheme = darkColorScheme(
+    primary = PrimaryDark,
+    onPrimary = OnPrimaryDark,
+    primaryContainer = PrimaryDark.copy(alpha = 0.15f),
+    onPrimaryContainer = PrimaryDark,
+    secondary = SecondaryDark,
+    onSecondary = OnSecondaryDark,
+    secondaryContainer = SecondaryDark.copy(alpha = 0.15f),
+    onSecondaryContainer = SecondaryDark,
+    tertiary = TertiaryDark,
+    onTertiary = OnTertiaryDark,
+    tertiaryContainer = TertiaryDark.copy(alpha = 0.15f),
+    onTertiaryContainer = TertiaryDark,
+    background = BackgroundDark,
+    onBackground = OnBackgroundDark,
+    surface = SurfaceDark,
+    onSurface = OnSurfaceDark,
+    surfaceVariant = SurfaceDark.copy(alpha = 0.7f),
+    onSurfaceVariant = OnSurfaceDark.copy(alpha = 0.7f),
+    error = SecondaryDark,
+    errorContainer = SecondaryDark.copy(alpha = 0.15f),
 )
 
 @Composable
 fun CocktailRecipesTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Disabled by default to use our custom colors
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -45,9 +75,17 @@ fun CocktailRecipesTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
+    }
+    
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = if (darkTheme) BackgroundDark.toArgb() else Background.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
     }
 
     MaterialTheme(
