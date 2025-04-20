@@ -20,26 +20,26 @@
   - [x] Design reusable UI components (3h)
 
 ## Phase 2: API Integration
-- [ ] Create data models for API responses
+- [x] Create data models for API responses
   - [x] Define Cocktail data classes (1h)
-  - [ ] Create mapping functions for domain models (1h)
-  - [ ] Add serialization annotations for JSON parsing (0.5h)
-  - [ ] Implement data validation (1h)
-- [ ] Implement network layer with Retrofit
-  - [ ] Create API service interfaces (1h)
-  - [ ] Set up Retrofit client with interceptors (2h)
-  - [ ] Implement API response handling (1h)
-  - [ ] Add authentication if required by API (1h)
-- [ ] Set up repository pattern
-  - [ ] Create repository interfaces in domain layer (1h)
-  - [ ] Implement repositories with data sources (2h)
-  - [ ] Add caching strategy (2h)
-  - [ ] Create test doubles for repositories (1h)
-- [ ] Add error handling for API calls
-  - [ ] Create error models and mappers (1h)
-  - [ ] Implement retry logic for transient errors (2h)
-  - [ ] Add offline detection and handling (2h)
-  - [ ] Create user-friendly error messages (1h)
+  - [x] Create mapping functions for domain models (1h)
+  - [x] Add serialization annotations for JSON parsing (0.5h)
+  - [x] Implement data validation (1h)
+- [x] Implement network layer with Retrofit
+  - [x] Create API service interfaces (1h)
+  - [x] Set up Retrofit client with interceptors (2h)
+  - [x] Implement API response handling (1h)
+  - [x] Add authentication if required by API (1h)
+- [x] Set up repository pattern
+  - [x] Create repository interfaces in domain layer (1h)
+  - [x] Implement repositories with data sources (2h)
+  - [x] Add caching strategy (2h)
+  - [x] Create test doubles for repositories (1h)
+- [x] Add error handling for API calls
+  - [x] Create error models and mappers (1h)
+  - [x] Implement retry logic for transient errors (2h)
+  - [x] Add offline detection and handling (2h)
+  - [x] Create user-friendly error messages (1h)
 
 ## Phase 3: Main Features
 - [ ] Create Home screen with popular cocktails list

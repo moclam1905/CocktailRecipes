@@ -1,113 +1,264 @@
 package com.nguyenmoclam.cocktailrecipes.data.repository
 
+import com.nguyenmoclam.cocktailrecipes.data.common.ApiError
+import com.nguyenmoclam.cocktailrecipes.data.common.NetworkMonitor
 import com.nguyenmoclam.cocktailrecipes.data.common.Resource
+import com.nguyenmoclam.cocktailrecipes.data.local.CocktailLocalDataSource
+import com.nguyenmoclam.cocktailrecipes.data.mapper.CocktailMapper
+import com.nguyenmoclam.cocktailrecipes.data.mapper.EntityMapper
+import com.nguyenmoclam.cocktailrecipes.data.remote.CocktailRemoteDataSource
 import com.nguyenmoclam.cocktailrecipes.domain.model.Cocktail
-import com.nguyenmoclam.cocktailrecipes.domain.model.Ingredient
 import com.nguyenmoclam.cocktailrecipes.domain.repository.CocktailRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * Implementation of CocktailRepository
- * This is a temporary implementation that returns mock data
+ * Coordinates between remote and local data sources with caching strategy and error handling
  */
 @Singleton
-class CocktailRepositoryImpl @Inject constructor() : CocktailRepository {
+class CocktailRepositoryImpl @Inject constructor(
+    private val remoteDataSource: CocktailRemoteDataSource,
+    private val localDataSource: CocktailLocalDataSource,
+    private val networkMonitor: NetworkMonitor
+) : CocktailRepository {
 
     override suspend fun getPopularCocktails(): Flow<Resource<List<Cocktail>>> = flow {
         emit(Resource.Loading)
-        // Mock data for demonstration
-        val mockCocktails = createMockCocktails()
-        emit(Resource.Success(mockCocktails))
+        
+        // Try to get data from cache first
+        if (localDataSource.isCacheValid()) {
+            val cachedCocktails = localDataSource.getCocktails().first()
+            val domainCocktails = EntityMapper.mapEntitiesToCocktails(cachedCocktails)
+            emit(Resource.Success(domainCocktails))
+        }
+        
+        // If offline and cache is not valid, return offline error
+        if (!networkMonitor.isNetworkAvailable() && !localDataSource.isCacheValid()) {
+            emit(Resource.error(ApiError.networkError("No internet connection. Using cached data.")))
+            return@flow
+        }
+        
+        // Fetch from network
+        when (val apiResult = remoteDataSource.getPopularCocktails()) {
+            is Resource.Success -> {
+                val cocktails = CocktailMapper.mapDrinkListResponseToCocktails(apiResult.data)
+                
+                // Cache the results
+                if (cocktails.isNotEmpty()) {
+                    val entities = EntityMapper.mapCocktailsToEntities(cocktails)
+                    localDataSource.saveCocktails(entities)
+                }
+                
+                emit(Resource.Success(cocktails))
+            }
+            is Resource.Error -> {
+                // If cache is available, don't emit error but inform about using cached data
+                if (localDataSource.isCacheValid()) {
+                    val cachedCocktails = localDataSource.getCocktails().first()
+                    val domainCocktails = EntityMapper.mapEntitiesToCocktails(cachedCocktails)
+                    emit(Resource.Success(domainCocktails))
+                } else {
+                    emit(apiResult)
+                }
+            }
+            is Resource.Loading -> {
+                // This shouldn't happen since remoteDataSource.getPopularCocktails() 
+                // returns either Success or Error
+            }
+        }
     }
 
     override suspend fun searchCocktailsByName(query: String): Flow<Resource<List<Cocktail>>> = flow {
         emit(Resource.Loading)
-        val mockCocktails = createMockCocktails().filter { 
-            it.name.contains(query, ignoreCase = true) 
+        
+        // Try local search first for better responsiveness
+        val localResults = localDataSource.searchCocktailsByName(query)
+        if (localResults.isNotEmpty()) {
+            emit(Resource.Success(EntityMapper.mapEntitiesToCocktails(localResults)))
         }
-        emit(Resource.Success(mockCocktails))
+        
+        // If offline, return only local results with a message
+        if (!networkMonitor.isNetworkAvailable()) {
+            if (localResults.isEmpty()) {
+                emit(Resource.error(ApiError.networkError("No internet connection. No matching cocktails found in cache.")))
+            }
+            return@flow
+        }
+        
+        // Then fetch from network
+        when (val apiResult = remoteDataSource.searchCocktailsByName(query)) {
+            is Resource.Success -> {
+                val cocktails = CocktailMapper.mapDrinkListResponseToCocktails(apiResult.data)
+                
+                // Cache the results
+                if (cocktails.isNotEmpty()) {
+                    val entities = EntityMapper.mapCocktailsToEntities(cocktails)
+                    localDataSource.saveCocktails(entities)
+                }
+                
+                emit(Resource.Success(cocktails))
+            }
+            is Resource.Error -> {
+                // If we already emitted local results, don't emit error
+                if (localResults.isEmpty()) {
+                    emit(apiResult)
+                }
+            }
+            is Resource.Loading -> {
+                // This shouldn't happen since remoteDataSource returns either Success or Error
+            }
+        }
     }
 
     override suspend fun searchCocktailsByIngredient(ingredient: String): Flow<Resource<List<Cocktail>>> = flow {
         emit(Resource.Loading)
-        val mockCocktails = createMockCocktails().filter {
-            it.ingredients.any { ing -> ing.name.contains(ingredient, ignoreCase = true) }
+        
+        // If offline, inform user
+        if (!networkMonitor.isNetworkAvailable()) {
+            emit(Resource.error(ApiError.networkError("No internet connection. Cannot search by ingredient offline.")))
+            return@flow
         }
-        emit(Resource.Success(mockCocktails))
+        
+        // For ingredient search, we primarily rely on the API
+        when (val apiResult = remoteDataSource.searchCocktailsByIngredient(ingredient)) {
+            is Resource.Success -> {
+                val cocktails = CocktailMapper.mapDrinkListResponseToCocktails(apiResult.data)
+                
+                // Cache the results
+                if (cocktails.isNotEmpty()) {
+                    val entities = EntityMapper.mapCocktailsToEntities(cocktails)
+                    localDataSource.saveCocktails(entities)
+                }
+                
+                emit(Resource.Success(cocktails))
+            }
+            is Resource.Error -> {
+                emit(apiResult)
+            }
+            is Resource.Loading -> {
+                // This shouldn't happen since remoteDataSource returns either Success or Error
+            }
+        }
     }
 
     override suspend fun getCocktailDetails(id: String): Flow<Resource<Cocktail>> = flow {
         emit(Resource.Loading)
-        val cocktail = createMockCocktails().find { it.id == id }
-        if (cocktail != null) {
-            emit(Resource.Success(cocktail))
-        } else {
-            emit(Resource.Error("Cocktail not found"))
+        
+        // Try to get data from cache first
+        val cachedCocktail = localDataSource.getCocktailById(id)
+        if (cachedCocktail != null && localDataSource.isCacheValid(id)) {
+            val isFavorite = localDataSource.isFavorite(id)
+            emit(Resource.Success(EntityMapper.mapEntityToCocktail(cachedCocktail, isFavorite)))
+        }
+        
+        // If offline and no valid cache, return offline error
+        if (!networkMonitor.isNetworkAvailable() && (cachedCocktail == null || !localDataSource.isCacheValid(id))) {
+            if (cachedCocktail != null) {
+                // If we have a cached cocktail but it's stale, use it but inform the user
+                val isFavorite = localDataSource.isFavorite(id)
+                emit(Resource.Success(EntityMapper.mapEntityToCocktail(cachedCocktail, isFavorite)))
+                emit(Resource.error(ApiError.networkError("Using cached data. Some information may be outdated.")))
+            } else {
+                emit(Resource.error(ApiError.networkError("No internet connection. Cocktail not found in cache.")))
+            }
+            return@flow
+        }
+        
+        // Fetch from network
+        when (val apiResult = remoteDataSource.getCocktailDetails(id)) {
+            is Resource.Success -> {
+                val cocktails = CocktailMapper.mapDrinkListResponseToCocktails(apiResult.data)
+                if (cocktails.isNotEmpty()) {
+                    val cocktail = cocktails.first()
+                    
+                    // Cache the result
+                    val entity = EntityMapper.mapCocktailToEntity(cocktail)
+                    localDataSource.saveCocktail(entity)
+                    
+                    // Update with favorite status
+                    val isFavorite = localDataSource.isFavorite(id)
+                    emit(Resource.Success(cocktail.copy(isFavorite = isFavorite)))
+                } else {
+                    emit(Resource.error(ApiError.notFoundError("Cocktail not found")))
+                }
+            }
+            is Resource.Error -> {
+                // If cache is available, don't emit error but use cached data
+                if (cachedCocktail != null) {
+                    val isFavorite = localDataSource.isFavorite(id)
+                    emit(Resource.Success(EntityMapper.mapEntityToCocktail(cachedCocktail, isFavorite)))
+                } else {
+                    emit(apiResult)
+                }
+            }
+            is Resource.Loading -> {
+                // This shouldn't happen since remoteDataSource returns either Success or Error
+            }
         }
     }
 
     override suspend fun saveFavorite(cocktail: Cocktail): Flow<Resource<Boolean>> = flow {
         emit(Resource.Loading)
-        // Mock saving to database
-        emit(Resource.Success(true))
+        
+        try {
+            // Save to local database first
+            val entity = EntityMapper.mapCocktailToEntity(cocktail)
+            localDataSource.saveCocktail(entity)
+            
+            // Add to favorites
+            localDataSource.addFavorite(cocktail.id)
+            
+            emit(Resource.Success(true))
+        } catch (e: Exception) {
+            emit(Resource.error(ApiError(
+                message = "Failed to save favorite: ${e.localizedMessage}",
+                throwable = e
+            )))
+        }
     }
 
     override suspend fun removeFavorite(id: String): Flow<Resource<Boolean>> = flow {
         emit(Resource.Loading)
-        // Mock removing from database
-        emit(Resource.Success(true))
+        
+        try {
+            // Remove from favorites
+            localDataSource.removeFavorite(id)
+            
+            emit(Resource.Success(true))
+        } catch (e: Exception) {
+            emit(Resource.error(ApiError(
+                message = "Failed to remove favorite: ${e.localizedMessage}",
+                throwable = e
+            )))
+        }
     }
 
     override suspend fun getFavorites(): Flow<Resource<List<Cocktail>>> = flow {
         emit(Resource.Loading)
-        // Return some mock favorites
-        val favorites = createMockCocktails().take(2).map { it.copy(isFavorite = true) }
-        emit(Resource.Success(favorites))
+        
+        try {
+            // Get all favorites from local database
+            localDataSource.getFavorites()
+                .map { entities ->
+                    Resource.Success(
+                        EntityMapper.mapEntitiesToCocktails(
+                            entities,
+                            entities.map { it.id }.toSet() // All these are favorites
+                        )
+                    )
+                }
+                .collect { emit(it) }
+        } catch (e: Exception) {
+            emit(Resource.error(ApiError(
+                message = "Failed to get favorites: ${e.localizedMessage}",
+                throwable = e
+            )))
+        }
     }
-
-    // Helper method to create mock cocktails
-    private fun createMockCocktails(): List<Cocktail> {
-        return listOf(
-            Cocktail(
-                id = "1",
-                name = "Mojito",
-                imageUrl = "https://www.thecocktaildb.com/images/media/drink/metwgh1606770327.jpg",
-                instructions = "Muddle mint leaves with sugar and lime juice. Add a splash of soda water and fill the glass with cracked ice. Pour the rum and top with soda water. Garnish with mint leaves and a lime wedge.",
-                ingredients = listOf(
-                    Ingredient("White rum", "2 oz"),
-                    Ingredient("Lime juice", "1 oz"),
-                    Ingredient("Sugar", "2 tsp"),
-                    Ingredient("Mint", "6 leaves"),
-                    Ingredient("Soda water", "Top")
-                )
-            ),
-            Cocktail(
-                id = "2",
-                name = "Margarita",
-                imageUrl = "https://www.thecocktaildb.com/images/media/drink/5noda61589575158.jpg",
-                instructions = "Rub the rim of the glass with the lime slice to make the salt stick to it. Take care to moisten only the outer rim and sprinkle the salt on it. The salt should present to the lips of the imbiber and never mix into the cocktail. Shake the other ingredients with ice, then carefully pour into the glass.",
-                ingredients = listOf(
-                    Ingredient("Tequila", "2 oz"),
-                    Ingredient("Triple sec", "1 oz"),
-                    Ingredient("Lime juice", "1 oz"),
-                    Ingredient("Salt", "Pinch")
-                )
-            ),
-            Cocktail(
-                id = "3",
-                name = "Old Fashioned",
-                imageUrl = "https://www.thecocktaildb.com/images/media/drink/vrwquq1478252802.jpg",
-                instructions = "Place sugar cube in old fashioned glass and saturate with bitters, add a dash of plain water. Muddle until dissolved. Fill the glass with ice cubes and add whiskey. Garnish with orange slice and a cocktail cherry.",
-                ingredients = listOf(
-                    Ingredient("Bourbon", "2 oz"),
-                    Ingredient("Angostura bitters", "2 dashes"),
-                    Ingredient("Sugar cube", "1"),
-                    Ingredient("Water", "Dash")
-                )
-            )
-        )
-    }
-} 
+}
