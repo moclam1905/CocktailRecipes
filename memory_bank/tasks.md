@@ -78,7 +78,7 @@
   - [ ] Test repository implementations (3h)
   - [ ] Write ViewModel tests (3h)
   - [ ] Test use cases and business logic (2h)
-  - [ ] Create test utilities and fixtures (2h)
+  - [x] Create test utilities and fixtures (2h)
 - [ ] Perform UI testing
   - [ ] Set up Compose UI testing framework (2h)
   - [ ] Create end-to-end tests for main user flows (4h)

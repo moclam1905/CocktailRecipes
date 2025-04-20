@@ -14,16 +14,24 @@
   - Created custom theme components
   - Implemented dark mode support
   - Designed reusable UI components
+- API Integration with TheCocktailDB
+  - Created mapping functions for domain models
+  - Set up Retrofit client with interceptors
+  - Implemented API response handling
+  - Added error handling for API calls
+- Testing infrastructure
+  - Created fake/mock implementations of data sources
+  - Implemented test data factory for consistent test data
+  - Added comprehensive testing utilities for repository testing
 
 ## In Progress
-- API Integration with TheCocktailDB
-  - Creating mapping functions for domain models
-  - Setting up Retrofit client
+- Home screen implementation with popular cocktails list
 
 ## Blocked
-None
+- JUnit setup issues need resolution before writing actual test cases
 
 ## Next Up
-- Complete API integration
 - Implement Home screen with popular cocktails list
+- Create cocktail detail screen
 - Set up Room database for favorites
+- Configure proper JUnit setup to enable running tests
