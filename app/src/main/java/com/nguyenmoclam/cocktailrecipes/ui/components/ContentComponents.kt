@@ -24,6 +24,8 @@ import coil.compose.AsyncImage
 import com.nguyenmoclam.cocktailrecipes.R
 import com.nguyenmoclam.cocktailrecipes.domain.model.Cocktail
 import com.nguyenmoclam.cocktailrecipes.domain.model.Ingredient
+import com.nguyenmoclam.cocktailrecipes.ui.util.createSharedElementKey
+import androidx.compose.ui.platform.testTag
 
 /**
  * Ingredient item for the recipe detail screen
@@ -198,7 +200,8 @@ fun CocktailListItem(
     cocktail: Cocktail,
     onClick: () -> Unit,
     onFavoriteClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enableTransition: Boolean = true
 ) {
     Card(
         modifier = modifier
@@ -218,16 +221,13 @@ fun CocktailListItem(
                 .height(120.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Cocktail Image
-            AsyncImage(
-                model = cocktail.imageUrl,
-                contentDescription = "Image of ${cocktail.name}",
+            // Cocktail Image with shared element transition
+            CocktailImage(
+                cocktail = cocktail,
                 modifier = Modifier
                     .size(120.dp)
                     .clip(RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp)),
-                contentScale = ContentScale.Crop,
-                placeholder = painterResource(id = R.drawable.placeholder_cocktail),
-                error = painterResource(id = R.drawable.placeholder_cocktail)
+                enableTransition = enableTransition
             )
             
             // Content
@@ -273,6 +273,36 @@ fun CocktailListItem(
             }
         }
     }
+}
+
+/**
+ * Reusable cocktail image composable with shared element support
+ */
+@Composable
+fun CocktailImage(
+    cocktail: Cocktail,
+    modifier: Modifier = Modifier,
+    enableTransition: Boolean = true,
+    contentScale: ContentScale = ContentScale.Crop
+) {
+    // For shared element transition, we simply add a unique test tag
+    // The actual transition will be handled by the navigation framework
+    val imageModifier = if (enableTransition) {
+        val sharedTransitionKey = createSharedElementKey(cocktail.id, "image")
+        modifier.testTag(sharedTransitionKey)
+    } else {
+        modifier
+    }
+    
+    // Regular image with or without transition tag
+    AsyncImage(
+        model = cocktail.imageUrl,
+        contentDescription = "Image of ${cocktail.name}",
+        modifier = imageModifier,
+        contentScale = contentScale,
+        placeholder = painterResource(id = R.drawable.placeholder_cocktail),
+        error = painterResource(id = R.drawable.placeholder_cocktail)
+    )
 }
 
 // Previews

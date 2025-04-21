@@ -24,11 +24,13 @@ import com.nguyenmoclam.cocktailrecipes.domain.model.Cocktail
 import com.nguyenmoclam.cocktailrecipes.domain.model.Ingredient
 import com.nguyenmoclam.cocktailrecipes.ui.components.*
 import com.nguyenmoclam.cocktailrecipes.ui.theme.CocktailRecipesTheme
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 
 /**
  * Home screen displaying the list of popular cocktails with pull-to-refresh
  */
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun HomeScreen(
     onCocktailClick: (String) -> Unit,

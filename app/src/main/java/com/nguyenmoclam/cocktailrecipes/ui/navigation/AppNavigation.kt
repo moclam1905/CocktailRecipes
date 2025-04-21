@@ -1,12 +1,16 @@
 package com.nguyenmoclam.cocktailrecipes.ui.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavHostController
 import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.nguyenmoclam.cocktailrecipes.ui.detail.CocktailDetailScreen
 import com.nguyenmoclam.cocktailrecipes.ui.home.HomeScreen
 
@@ -16,16 +20,47 @@ object NavDestinations {
     const val COCKTAIL_ID_ARG = "cocktailId"
 }
 
+// Transition duration for animations
+private const val TRANSITION_DURATION = 500
+
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AppNavigation(
-    navController: NavHostController = rememberNavController(),
     startDestination: String = NavDestinations.HOME
 ) {
-    NavHost(
+    val navController = rememberAnimatedNavController()
+    
+    AnimatedNavHost(
         navController = navController,
-        startDestination = startDestination
+        startDestination = startDestination,
+        enterTransition = { 
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                animationSpec = tween(TRANSITION_DURATION)
+            ) + fadeIn(animationSpec = tween(TRANSITION_DURATION))
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                animationSpec = tween(TRANSITION_DURATION)
+            ) + fadeOut(animationSpec = tween(TRANSITION_DURATION))
+        },
+        popEnterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.End,
+                animationSpec = tween(TRANSITION_DURATION)
+            ) + fadeIn(animationSpec = tween(TRANSITION_DURATION))
+        },
+        popExitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.End,
+                animationSpec = tween(TRANSITION_DURATION)
+            ) + fadeOut(animationSpec = tween(TRANSITION_DURATION))
+        }
     ) {
-        composable(NavDestinations.HOME) {
+        composable(
+            route = NavDestinations.HOME
+        ) {
             HomeScreen(
                 onCocktailClick = { cocktailId ->
                     navController.navigate("${NavDestinations.COCKTAIL_DETAIL}/$cocktailId")

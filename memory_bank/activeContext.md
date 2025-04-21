@@ -1,13 +1,17 @@
 # Active Context
 
 ## Current Focus
-Implementing the cocktail detail screen
+Implementing search functionality and favorites feature
 
 ## Active Tasks
-- Design detail screen layout (2h)
-- Create ingredient list component (2h)
-- Implement instructions section (1h)
-- Add image loading with Coil (1h)
+- Create search bar component (2h)
+- Implement search repository methods (2h)
+- Add search history feature (2h)
+- Support filtering by ingredient (2h)
+- Design database schema for favorites (1h)
+- Implement Room DAO and database (2h)
+- Create favorite toggle functionality (1h)
+- Build favorites list screen (3h)
 
 ## Dependencies Added
 - Hilt for dependency injection ✅
@@ -18,6 +22,7 @@ Implementing the cocktail detail screen
 - Coil for image loading ✅
 - Compose Material for pull-to-refresh ✅
 - Hilt Navigation for navigation ✅
+- Animation libraries for smooth transitions ✅
 
 ## Implementation Notes
 - The TheCocktailDB API endpoints:
@@ -26,6 +31,7 @@ Implementing the cocktail detail screen
   - https://www.thecocktaildb.com/api/json/v1/1/filter.php?i={ingredient} - Filter by ingredient
   - https://www.thecocktaildb.com/api/json/v1/1/filter.php?c=Cocktail - Get popular cocktails
   - https://www.thecocktaildb.com/api/json/v1/1/random.php - Get random cocktail
-- Home screen implementation is complete with pull-to-refresh functionality
-- Detail screen should display comprehensive information about selected cocktail
-- Need to implement navigation from home to detail with cocktail ID
+- Home screen implementation is complete with pull-to-refresh functionality ✅
+- Detail screen implementation is complete ✅
+- Search functionality should allow for searching cocktails by name and filtering by ingredient
+- Favorites feature needs integration with Room database for local storage

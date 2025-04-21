@@ -89,8 +89,18 @@ dependencies {
     // Coil for image loading
     implementation(libs.coil.compose)
 
-    implementation ("com.google.accompanist:accompanist-navigation-material:0.32.0")
-    implementation ("com.google.accompanist:accompanist-navigation-animation:0.32.0")
+    // Navigation with animations
+    implementation(libs.androidx.navigation.compose)
+    implementation (libs.accompanist.navigation.material)
+    implementation (libs.accompanist.navigation.animation)
+    implementation(libs.accompanist.systemuicontroller)
+    
+    // Animation libraries
+    implementation(libs.androidx.animation.graphics)
+    implementation(libs.androidx.animation.core)
+    implementation(libs.androidx.animation)
+    implementation(libs.androidx.ui.util)
+    implementation(libs.material.motion.compose.core)
     
     // Testing
     testImplementation(libs.junit)

@@ -1,5 +1,9 @@
 package com.nguyenmoclam.cocktailrecipes.ui.detail
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -14,6 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -21,8 +28,10 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.nguyenmoclam.cocktailrecipes.domain.model.Cocktail
 import com.nguyenmoclam.cocktailrecipes.domain.model.Ingredient
+import com.nguyenmoclam.cocktailrecipes.ui.components.CocktailImage
+import com.nguyenmoclam.cocktailrecipes.ui.util.createSharedElementKey
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun CocktailDetailScreen(
     viewModel: CocktailDetailViewModel = hiltViewModel(),
@@ -63,10 +72,18 @@ fun CocktailDetailScreen(
             }
             is CocktailDetailViewModel.UiState.Success -> {
                 val cocktail = uiState.data
-                DetailContent(
-                    cocktail = cocktail,
-                    modifier = Modifier.padding(paddingValues)
-                )
+                
+                // Use AnimatedVisibility to fade in content except for shared elements
+                AnimatedVisibility(
+                    visible = true,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    DetailContent(
+                        cocktail = cocktail,
+                        modifier = Modifier.padding(paddingValues)
+                    )
+                }
             }
             is CocktailDetailViewModel.UiState.Error -> {
                 Box(
@@ -100,16 +117,13 @@ private fun DetailContent(
             fontWeight = FontWeight.Bold
         )
         
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(cocktail.imageUrl)
-                .crossfade(true)
-                .build(),
-            contentDescription = cocktail.name,
-            contentScale = ContentScale.FillWidth,
+        // Use the CocktailImage component with shared element transition
+        CocktailImage(
+            cocktail = cocktail,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
+                .height(200.dp),
+            contentScale = ContentScale.FillWidth
         )
         
         IngredientList(ingredients = cocktail.ingredients)
