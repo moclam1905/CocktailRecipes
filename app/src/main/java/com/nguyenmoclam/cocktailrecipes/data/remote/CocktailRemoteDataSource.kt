@@ -40,7 +40,9 @@ class CocktailRemoteDataSource @Inject constructor(
             }
             
             // Execute the call with retry support
-            retryHandler.executeWithRetry { apiCall() }
+            retryHandler.executeWithRetry(
+                operation = { apiCall() }
+            )
                 .fold(
                     onSuccess = { Resource.Success(it) },
                     onFailure = { throwable ->

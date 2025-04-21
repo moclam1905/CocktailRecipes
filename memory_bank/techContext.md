@@ -14,9 +14,14 @@ Following MVVM with Clean Architecture pattern:
 - **Local Storage**: Room Database for caching and favorites
 - **Concurrency**: Kotlin Coroutines & Flow for async operations
 - **Image Loading**: Coil for efficient image loading and caching
+- **Error Handling**: Custom Resource wrapper with retry mechanism
+- **State Management**: StateFlow with collectAsStateWithLifecycle
 
 ## API
 Using TheCocktailDB API for cocktail data.
+- Remote data source properly handles network errors and provides retry logic
+- Repository pattern abstracts the data source from the UI layer
+- Network monitoring implemented to avoid unnecessary API calls when offline
 
 ## Testing Architecture
 - **Test Doubles**: Fake implementations of repositories and data sources
@@ -28,8 +33,13 @@ Using TheCocktailDB API for cocktail data.
 - **data**: API interfaces, repositories, and data sources
 - **domain**: Use cases and business logic
 - **ui**: Compose UI components and ViewModels
+  - **home**: Home screen components and ViewModel
+  - **components**: Reusable Compose UI components
+  - **theme**: App theme definitions
+  - **base**: Base classes for common functionality
 - **di**: Dependency injection modules
 
 ## Testing Strategy
 - Unit tests for ViewModels, repositories, and use cases
 - UI tests for critical user flows
+- QA process for feature verification

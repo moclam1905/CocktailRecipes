@@ -42,11 +42,11 @@
   - [x] Create user-friendly error messages (1h)
 
 ## Phase 3: Main Features
-- [ ] Create Home screen with popular cocktails list
-  - [ ] Design and implement Home screen layout (3h)
-  - [ ] Create cocktail list item composable (2h)
-  - [ ] Implement lazy loading for performance (2h)
-  - [ ] Add pull-to-refresh functionality (1h)
+- [x] Create Home screen with popular cocktails list
+  - [x] Design and implement Home screen layout (3h)
+  - [x] Create cocktail list item composable (2h)
+  - [x] Implement lazy loading for performance (2h)
+  - [x] Add pull-to-refresh functionality (1h)
 - [ ] Implement cocktail detail screen
   - [ ] Design detail screen layout (2h)
   - [ ] Create ingredient list component (2h)
@@ -78,9 +78,27 @@
   - [ ] Test repository implementations (3h)
   - [ ] Write ViewModel tests (3h)
   - [ ] Test use cases and business logic (2h)
-  - [x] Create test utilities and fixtures (2h)
+  - [ ] Create test utilities and fixtures (2h)
 - [ ] Perform UI testing
   - [ ] Set up Compose UI testing framework (2h)
   - [ ] Create end-to-end tests for main user flows (4h)
   - [ ] Test screen navigation and state preservation (2h)
   - [ ] Verify accessibility compliance (2h)
+
+## Phase 5: Improve some features:
+- [ ] Implement API optimization enhancements
+  - [ ] Add HTTP caching to reduce API calls (2h)
+    - [ ] Configure OkHttp cache interceptor with appropriate cache size (0.5h)
+    - [ ] Implement cache control headers for GET requests (0.5h)
+    - [ ] Add cache invalidation logic for time-sensitive data (0.5h)
+    - [ ] Create mechanism to force refresh data regardless of cache (0.5h)
+  - [ ] Implement rate limiting protection (1h)
+    - [ ] Create rate limit interceptor to track API calls (0.5h)
+    - [ ] Implement exponential backoff for rate limit responses (0.5h)
+    - [ ] Add user-facing feedback when rate limits are reached (0.5h)
+    - [ ] Store and respect rate limit headers from API responses (0.5h)
+  - [ ] Add analytics for API call performance (2h)
+    - [ ] Create performance tracking interceptor to log call durations (0.5h)
+    - [ ] Implement error rate tracking mechanism (0.5h)
+    - [ ] Add reporting system for slow or failed API calls (0.5h)
+    - [ ] Create dashboard or logging visualization for performance metrics (1h)

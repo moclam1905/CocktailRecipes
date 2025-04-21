@@ -10,10 +10,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nguyenmoclam.cocktailrecipes.ui.theme.CocktailRecipesTheme
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImage
+import com.nguyenmoclam.cocktailrecipes.R
+import com.nguyenmoclam.cocktailrecipes.domain.model.Cocktail
+import com.nguyenmoclam.cocktailrecipes.domain.model.Ingredient
 
 /**
  * Ingredient item for the recipe detail screen
@@ -179,6 +189,92 @@ fun EmptyStateView(
     }
 }
 
+/**
+ * Cocktail list item for the home screen
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CocktailListItem(
+    cocktail: Cocktail,
+    onClick: () -> Unit,
+    onFavoriteClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Cocktail Image
+            AsyncImage(
+                model = cocktail.imageUrl,
+                contentDescription = "Image of ${cocktail.name}",
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp)),
+                contentScale = ContentScale.Crop,
+                placeholder = painterResource(id = R.drawable.placeholder_cocktail),
+                error = painterResource(id = R.drawable.placeholder_cocktail)
+            )
+            
+            // Content
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = cocktail.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                // Show first few ingredients
+                val ingredientsText = cocktail.ingredients
+                    .take(2)
+                    .joinToString(", ") { it.name }
+                
+                Text(
+                    text = ingredientsText + if (cocktail.ingredients.size > 2) "..." else "",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            
+            // Favorite Button
+            IconButton(
+                onClick = onFavoriteClick,
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Icon(
+                    imageVector = if (cocktail.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = if (cocktail.isFavorite) "Remove from favorites" else "Add to favorites",
+                    tint = if (cocktail.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
 // Previews
 @Preview(showBackground = true)
 @Composable
@@ -228,6 +324,29 @@ fun EmptyStateViewPreview() {
         EmptyStateView(
             title = "No Favorites Yet",
             message = "Start adding cocktails to your favorites to see them here."
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CocktailListItemPreview() {
+    CocktailRecipesTheme {
+        CocktailListItem(
+            cocktail = Cocktail(
+                id = "1",
+                name = "Mojito",
+                imageUrl = "",
+                instructions = "Mix ingredients...",
+                ingredients = listOf(
+                    Ingredient("White Rum", "2 oz"),
+                    Ingredient("Lime Juice", "1 oz"),
+                    Ingredient("Mint Leaves", "6 leaves")
+                ),
+                isFavorite = false
+            ),
+            onClick = {},
+            onFavoriteClick = {}
         )
     }
 } 
