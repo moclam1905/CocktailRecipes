@@ -29,29 +29,23 @@ object CocktailMapper {
      * Returns null if any required fields are missing
      */
     fun mapDrinkDtoToCocktail(drinkDto: DrinkDto?): Cocktail? {
-        // Validate required fields
+        // Validate required fields - only id and name are mandatory
         if (drinkDto == null ||
             drinkDto.id.isNullOrBlank() ||
-            drinkDto.name.isNullOrBlank() ||
-            drinkDto.instructions.isNullOrBlank()) {
+            drinkDto.name.isNullOrBlank()) {
             return null
         }
         
         // Extract and pair ingredients with their measures
         val ingredients = extractIngredients(drinkDto)
         
-        // If no ingredients were found, the cocktail is invalid
-        if (ingredients.isEmpty()) {
-            return null
-        }
-        
         // Create domain model with validated data
         return Cocktail(
             id = drinkDto.id,
             name = drinkDto.name,
             imageUrl = drinkDto.imageUrl ?: "",
-            instructions = drinkDto.instructions,
-            ingredients = ingredients,
+            instructions = drinkDto.instructions ?: "No instructions available",
+            ingredients = ingredients.ifEmpty { listOf(Ingredient("Unknown", "Not specified")) },
             isFavorite = false // Default value for new cocktails from API
         )
     }
