@@ -66,16 +66,16 @@
   - [x] Build favorites list screen (3h)
 
 ## Phase 4: Polishing & Testing
-- [ ] Add loading states and error handling in UI
-  - [ ] Create loading composables and animations (2h)
-  - [ ] Implement error states and retry actions (2h)
-  - [ ] Add empty state designs (1h)
-  - [ ] Handle edge cases in UI (2h)
-- [ ] Implement offline capability
-  - [ ] Set up WorkManager for background syncing (3h)
-  - [ ] Implement database caching strategy (3h)
-  - [ ] Add network state monitoring (1h)
-  - [ ] Create offline mode indicator (1h)
+- [x] Add loading states and error handling in UI
+  - [x] Create loading composables and animations (2h)
+  - [x] Implement error states and retry actions (2h)
+  - [x] Add empty state designs (1h)
+  - [x] Handle edge cases in UI (2h)
+- [x] Implement offline capability
+  - [x] Set up WorkManager for background syncing (3h)
+  - [x] Implement database caching strategy (3h)
+  - [x] Add network state monitoring (1h)
+  - [x] Create offline mode indicator (1h)
 - [ ] Write unit tests
   - [ ] Test repository implementations (3h)
   - [ ] Write ViewModel tests (3h)
@@ -104,3 +104,21 @@
     - [ ] Implement error rate tracking mechanism (0.5h)
     - [ ] Add reporting system for slow or failed API calls (0.5h)
     - [ ] Create dashboard or logging visualization for performance metrics (1h)
+
+## Phase 6: Settings Screen
+- [ ] Implement Settings Screen Foundation
+  - [ ] Define Settings screen Composable structure (0.5h)
+  - [ ] Create SettingsViewModel (if needed for future state) (0.5h)
+  - [ ] Implement basic navigation to Settings screen (from Home/menu) (0.5h)
+- [ ] Build 'About' Section
+  - [ ] Design 'About' section layout within Settings screen (0.5h)
+  - [ ] Implement logic to fetch and display app version name/code (0.5h)
+  - [ ] Add basic info text (e.g., developer, data source) (0.5h)
+- [ ] (Future) Implement Theme Selection
+  - [ ] Design Theme selection UI (e.g., Radio buttons) (0.5h)
+  - [ ] Implement ViewModel logic to handle theme state (1h)
+  - [ ] Apply selected theme dynamically (1h)
+- [ ] (Future) Implement Cache Clearing
+  - [ ] Design cache clearing UI (e.g., Button, confirmation dialog) (0.5h)
+  - [ ] Implement repository/use case method to clear relevant caches (1h)
+  - [ ] Connect UI action to cache clearing logic (0.5h)

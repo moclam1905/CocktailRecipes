@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.nguyenmoclam.cocktailrecipes.ui.components.CocktailListItem
+import com.nguyenmoclam.cocktailrecipes.ui.components.CocktailListLoadingPlaceholder
 import com.nguyenmoclam.cocktailrecipes.ui.components.SearchBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -153,12 +154,10 @@ fun SearchScreen(
                         }
                     }
                     SearchUIState.Loading -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
+                        // Use the shimmer placeholder instead of a simple spinner
+                        CocktailListLoadingPlaceholder(
+                            modifier = Modifier.fillMaxSize()
+                        )
                     }
                     is SearchUIState.Success -> {
                         val cocktails = (uiState as SearchUIState.Success).cocktails

@@ -80,6 +80,7 @@ dependencies {
     // Room Database
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
+    implementation(libs.androidx.room.paging)
     ksp(libs.androidx.room.compiler)
 
     // Coroutines
@@ -102,6 +103,13 @@ dependencies {
     implementation(libs.androidx.ui.util)
     implementation(libs.material.motion.compose.core)
     
+    // WorkManager for background processing
+    implementation(libs.workmanager.runtime)
+    implementation(libs.workmanager.hilt)
+    
+    // Logging
+    implementation(libs.timber)
+    
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.coroutines.core)
@@ -114,4 +122,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Material Icons Extended
+    implementation(libs.androidx.compose.material.icons.extended)
 }

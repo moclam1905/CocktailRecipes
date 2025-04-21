@@ -29,6 +29,7 @@ import coil.request.ImageRequest
 import com.nguyenmoclam.cocktailrecipes.domain.model.Cocktail
 import com.nguyenmoclam.cocktailrecipes.domain.model.Ingredient
 import com.nguyenmoclam.cocktailrecipes.ui.components.CocktailImage
+import com.nguyenmoclam.cocktailrecipes.ui.components.PulsatingLoadingIndicator
 import com.nguyenmoclam.cocktailrecipes.ui.util.createSharedElementKey
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -61,14 +62,11 @@ fun CocktailDetailScreen(
     ) { paddingValues ->
         when (val uiState = state) {
             is CocktailDetailViewModel.UiState.Loading -> {
-                Box(
+                PulsatingLoadingIndicator(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+                        .padding(paddingValues)
+                )
             }
             is CocktailDetailViewModel.UiState.Success -> {
                 val cocktail = uiState.data

@@ -86,9 +86,9 @@ fun HomeScreen(
                     .padding(paddingValues)
             ) {
                 when {
-                    // Show loading state
+                    // Show loading state using shimmer placeholder
                     uiState.isLoading && uiState.cocktails.isEmpty() -> {
-                        LoadingIndicator(
+                        CocktailListLoadingPlaceholder(
                             modifier = Modifier.fillMaxSize()
                         )
                     }
