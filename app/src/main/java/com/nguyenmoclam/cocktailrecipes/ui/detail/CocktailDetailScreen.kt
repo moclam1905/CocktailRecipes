@@ -1,0 +1,194 @@
+package com.nguyenmoclam.cocktailrecipes.ui.detail
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.nguyenmoclam.cocktailrecipes.domain.model.Cocktail
+import com.nguyenmoclam.cocktailrecipes.domain.model.Ingredient
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CocktailDetailScreen(
+    viewModel: CocktailDetailViewModel = hiltViewModel(),
+    cocktailId: String,
+    onBackPressed: () -> Unit
+) {
+    val state by viewModel.state.collectAsState()
+    
+    LaunchedEffect(cocktailId) {
+        viewModel.loadCocktailDetails(cocktailId)
+    }
+    
+    Scaffold(
+        topBar = {
+            SmallTopAppBar(
+                title = { Text("Cocktail Details") },
+                navigationIcon = {
+                    IconButton(onClick = onBackPressed) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        when (val uiState = state) {
+            is CocktailDetailViewModel.UiState.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            is CocktailDetailViewModel.UiState.Success -> {
+                val cocktail = uiState.data
+                DetailContent(
+                    cocktail = cocktail,
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
+            is CocktailDetailViewModel.UiState.Error -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Error: ${uiState.message}")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DetailContent(
+    cocktail: Cocktail,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = cocktail.name,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
+        
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(cocktail.imageUrl)
+                .crossfade(true)
+                .build(),
+            contentDescription = cocktail.name,
+            contentScale = ContentScale.FillWidth,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+        )
+        
+        IngredientList(ingredients = cocktail.ingredients)
+        
+        Text(
+            text = "Instructions",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        
+        Text(
+            text = cocktail.instructions,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+@Composable
+fun IngredientList(
+    ingredients: List<Ingredient>,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = "Ingredients",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                ingredients.forEachIndexed { index, ingredient ->
+                    IngredientItem(ingredient = ingredient)
+                    
+                    if (index < ingredients.size - 1) {
+                        Divider(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            thickness = 1.dp,
+                            color = MaterialTheme.colorScheme.outlineVariant
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun IngredientItem(
+    ingredient: Ingredient,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = ingredient.name,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f)
+        )
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Text(
+            text = ingredient.measure,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+} 

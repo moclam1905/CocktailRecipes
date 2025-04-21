@@ -47,9 +47,9 @@
   - [x] Create cocktail list item composable (2h)
   - [x] Implement lazy loading for performance (2h)
   - [x] Add pull-to-refresh functionality (1h)
-- [ ] Implement cocktail detail screen
-  - [ ] Design detail screen layout (2h)
-  - [ ] Create ingredient list component (2h)
+- [x] Implement cocktail detail screen
+  - [x] Design detail screen layout (2h)
+  - [x] Create ingredient list component(2h)
   - [ ] Implement instructions section (1h)
   - [ ] Add image loading with Coil (1h)
 - [ ] Build search functionality

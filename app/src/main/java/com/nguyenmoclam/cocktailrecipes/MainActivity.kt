@@ -8,10 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.nguyenmoclam.cocktailrecipes.ui.home.HomeScreen
+import com.nguyenmoclam.cocktailrecipes.ui.navigation.AppNavigation
 import com.nguyenmoclam.cocktailrecipes.ui.theme.CocktailRecipesTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -35,17 +32,5 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun CocktailApp() {
-    val navController = rememberNavController()
-    
-    NavHost(navController = navController, startDestination = "home") {
-        composable("home") {
-            HomeScreen(
-                onCocktailClick = { cocktailId ->
-                    // Will navigate to details screen in future implementation
-                    // navController.navigate("details/$cocktailId")
-                }
-            )
-        }
-        // More screens will be added here in future implementations
-    }
+    AppNavigation()
 }
