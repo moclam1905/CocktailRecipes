@@ -44,7 +44,7 @@ class HomeViewModel @Inject constructor(
         loadCocktails()
     }
 
-    override suspend fun processEvent(event: HomeEvent) {
+    public override suspend fun processEvent(event: HomeEvent) {
         when (event) {
             is HomeEvent.LoadCocktails -> loadCocktails()
             is HomeEvent.RefreshCocktails -> refreshCocktails()

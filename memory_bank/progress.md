@@ -65,14 +65,19 @@
   - Added NetworkMonitor for detecting and responding to connection changes
   - Created offline mode indicator with animations and sync action
   - Implemented database caching strategy for offline viewing
+- **Implemented comprehensive unit tests:**
+  - Created test utilities and fixtures (TestDispatcherRule, TestData, MockWebServerUtil)
+  - Added testing dependencies (JUnit, Mockito, Turbine, MockWebServer)
+  - Wrote unit tests for CocktailRepositoryImpl, HomeViewModel, and CocktailMapper
+  - Resolved linter errors related to test setup and function calls
 
 ## In Progress
-- Writing unit tests for ViewModels and repositories
+- Perform UI testing for main user flows
 
 ## Blocked
-- JUnit setup issues need resolution before writing actual test cases
+- None currently
 
 ## Next Up
-- Write unit tests for ViewModels and use cases
 - Perform UI testing for main user flows
 - Implement API optimization enhancements (HTTP caching, rate limiting protection, analytics)
+- Implement Settings screen

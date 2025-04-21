@@ -116,6 +116,16 @@ dependencies {
     testImplementation(libs.coroutines.android)
     testImplementation(libs.coroutines.test)
     
+    // Mockito 
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    
+    // Turbine for Flow testing
+    testImplementation(libs.turbine)
+    
+    // MockWebServer for API testing
+    testImplementation(libs.mockwebserver)
+    
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

@@ -76,11 +76,11 @@
   - [x] Implement database caching strategy (3h)
   - [x] Add network state monitoring (1h)
   - [x] Create offline mode indicator (1h)
-- [ ] Write unit tests
-  - [ ] Test repository implementations (3h)
-  - [ ] Write ViewModel tests (3h)
-  - [ ] Test use cases and business logic (2h)
-  - [ ] Create test utilities and fixtures (2h)
+- [x] Write unit tests
+  - [x] Test repository implementations (3h)
+  - [x] Write ViewModel tests (3h)
+  - [x] Test use cases and business logic (2h)
+  - [x] Create test utilities and fixtures (2h)
 - [ ] Perform UI testing
   - [ ] Set up Compose UI testing framework (2h)
   - [ ] Create end-to-end tests for main user flows (4h)
