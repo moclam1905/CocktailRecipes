@@ -11,11 +11,3 @@ data class Cocktail(
     val ingredients: List<Ingredient>,
     val isFavorite: Boolean = false
 )
-
-/**
- * Domain model for an Ingredient
- */
-data class Ingredient(
-    val name: String,
-    val measure: String
-) 

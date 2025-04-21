@@ -43,4 +43,9 @@ interface CocktailRepository {
      * Get all favorite cocktails
      */
     suspend fun getFavorites(): Flow<Resource<List<Cocktail>>>
+    
+    /**
+     * Check if a cocktail is in favorites
+     */
+    suspend fun isFavorite(id: String): Flow<Resource<Boolean>>
 } 

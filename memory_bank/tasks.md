@@ -7,7 +7,7 @@
   - [x] Implement base ViewModel with StateFlow support (2h)
   - [x] Set up Hilt dependency injection structure (3h)
   - [x] Create repository interfaces and implementations (2h)
-- [ ] Configure build.gradle with dependencies
+- [x] Configure build.gradle with dependencies
   - [x] Add Retrofit and OkHttp for networking (1h)
   - [x] Configure Room for local database (1h)
   - [x] Set up Hilt for dependency injection (1h)
@@ -50,18 +50,20 @@
 - [x] Implement cocktail detail screen
   - [x] Design detail screen layout (2h)
   - [x] Create ingredient list component(2h)
-  - [ ] Implement instructions section (1h)
-  - [ ] Add image loading with Coil (1h)
-- [ ] Build search functionality
-  - [ ] Create search bar component (2h)
-  - [ ] Implement search repository methods (2h)
-  - [ ] Add search history feature (2h)
-  - [ ] Support filtering by ingredient (2h)
-- [ ] Create favorites feature with Room integration
-  - [ ] Design database schema for favorites (1h)
-  - [ ] Implement Room DAO and database (2h)
-  - [ ] Create favorite toggle functionality (1h)
-  - [ ] Build favorites list screen (3h)
+  - [x] Implement instructions section (1h)
+  - [x] Add image loading with Coil (1h)
+- [x] Build search functionality
+  - [x] Create search bar component (2h)
+  - [x] Implement search repository methods (2h)
+  - [x] Add search history feature (2h)
+  - [x] Support filtering by ingredient (2h)
+  - [x] Refine search UI state management (uiState, recently viewed) (1h)
+  - [x] Fix search results list scroll position (0.5h)
+- [x] Create favorites feature with Room integration
+  - [x] Design database schema for favorites (1h)
+  - [x] Implement Room DAO and database (2h)
+  - [x] Create favorite toggle functionality (1h)
+  - [x] Build favorites list screen (3h)
 
 ## Phase 4: Polishing & Testing
 - [ ] Add loading states and error handling in UI

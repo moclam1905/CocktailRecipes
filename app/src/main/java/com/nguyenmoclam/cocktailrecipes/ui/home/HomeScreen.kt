@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -34,6 +35,8 @@ import androidx.compose.animation.ExperimentalAnimationApi
 @Composable
 fun HomeScreen(
     onCocktailClick: (String) -> Unit,
+    onSearchClick: () -> Unit,
+    onFavoritesClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -61,10 +64,16 @@ fun HomeScreen(
                         )
                     },
                     actions = {
-                        IconButton(onClick = { /* TODO: Navigate to search */ }) {
+                        IconButton(onClick = onSearchClick) {
                             Icon(
                                 imageVector = Icons.Default.Search,
                                 contentDescription = "Search"
+                            )
+                        }
+                        IconButton(onClick = onFavoritesClick) {
+                            Icon(
+                                imageVector = Icons.Default.Favorite,
+                                contentDescription = "Favorites"
                             )
                         }
                     }
@@ -142,7 +151,9 @@ fun HomeScreen(
 fun HomeScreenPreview() {
     CocktailRecipesTheme {
         HomeScreen(
-            onCocktailClick = {}
+            onCocktailClick = {},
+            onSearchClick = {},
+            onFavoritesClick = {}
         )
     }
 }

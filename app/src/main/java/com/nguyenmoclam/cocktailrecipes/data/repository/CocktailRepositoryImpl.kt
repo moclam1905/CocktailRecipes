@@ -4,6 +4,7 @@ import com.nguyenmoclam.cocktailrecipes.data.common.ApiError
 import com.nguyenmoclam.cocktailrecipes.data.common.NetworkMonitor
 import com.nguyenmoclam.cocktailrecipes.data.common.Resource
 import com.nguyenmoclam.cocktailrecipes.data.local.CocktailLocalDataSource
+import com.nguyenmoclam.cocktailrecipes.data.local.FavoritesLocalDataSource
 import com.nguyenmoclam.cocktailrecipes.data.mapper.CocktailMapper
 import com.nguyenmoclam.cocktailrecipes.data.mapper.EntityMapper
 import com.nguyenmoclam.cocktailrecipes.data.remote.CocktailRemoteDataSource
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
+import android.util.Log
 
 /**
  * Implementation of CocktailRepository
@@ -25,6 +27,7 @@ import javax.inject.Singleton
 class CocktailRepositoryImpl @Inject constructor(
     private val remoteDataSource: CocktailRemoteDataSource,
     private val localDataSource: CocktailLocalDataSource,
+    private val favoritesLocalDataSource: FavoritesLocalDataSource,
     private val networkMonitor: NetworkMonitor
 ) : CocktailRepository {
 
@@ -150,115 +153,136 @@ class CocktailRepositoryImpl @Inject constructor(
     override suspend fun getCocktailDetails(id: String): Flow<Resource<Cocktail>> = flow {
         emit(Resource.Loading)
         
-        // Try to get data from cache first
+        // Check if the cocktail is in the local cache
         val cachedCocktail = localDataSource.getCocktailById(id)
-        if (cachedCocktail != null && localDataSource.isCacheValid(id)) {
-            val isFavorite = localDataSource.isFavorite(id)
+        
+        if (cachedCocktail != null) {
+            // Get favorite status from local data source
+            val isFavorite = localDataSource.isFavorite(id) || favoritesLocalDataSource.isFavorite(id)
             emit(Resource.Success(EntityMapper.mapEntityToCocktail(cachedCocktail, isFavorite)))
-        }
-        
-        // If offline and no valid cache, return offline error
-        if (!networkMonitor.isNetworkAvailable() && (cachedCocktail == null || !localDataSource.isCacheValid(id))) {
-            if (cachedCocktail != null) {
-                // If we have a cached cocktail but it's stale, use it but inform the user
-                val isFavorite = localDataSource.isFavorite(id)
-                emit(Resource.Success(EntityMapper.mapEntityToCocktail(cachedCocktail, isFavorite)))
-                emit(Resource.error(ApiError.networkError("Using cached data. Some information may be outdated.")))
-            } else {
-                emit(Resource.error(ApiError.networkError("No internet connection. Cocktail not found in cache.")))
-            }
-            return@flow
-        }
-        
-        // Fetch from network
-        when (val apiResult = remoteDataSource.getCocktailDetails(id)) {
-            is Resource.Success -> {
-                val cocktails = CocktailMapper.mapDrinkListResponseToCocktails(apiResult.data)
-                if (cocktails.isNotEmpty()) {
-                    val cocktail = cocktails.first()
-                    
-                    // Cache the result
-                    val entity = EntityMapper.mapCocktailToEntity(cocktail)
-                    localDataSource.saveCocktail(entity)
-                    
-                    // Update with favorite status
-                    val isFavorite = localDataSource.isFavorite(id)
-                    emit(Resource.Success(cocktail.copy(isFavorite = isFavorite)))
-                } else {
-                    emit(Resource.error(ApiError.notFoundError("Cocktail not found")))
+            
+            // Try to get updated data from API in the background
+            try {
+                when (val remoteResult = remoteDataSource.getCocktailDetails(id)) {
+                    is Resource.Success -> {
+                        // Map DrinkListResponse to Cocktail object
+                        val cocktailFromApi = CocktailMapper.mapDrinkListResponseToCocktails(remoteResult.data).firstOrNull()
+                        
+                        if (cocktailFromApi != null) {
+                            // Update the cache with the latest data
+                            val entity = EntityMapper.mapCocktailToEntity(cocktailFromApi)
+                            localDataSource.saveCocktail(entity)
+                            
+                            // Get updated cocktail from cache
+                            val updatedCocktail = localDataSource.getCocktailById(id)
+                            if (updatedCocktail != null) {
+                                // Maintain favorite status
+                                val updatedIsFavorite = localDataSource.isFavorite(id) || favoritesLocalDataSource.isFavorite(id)
+                                emit(Resource.Success(EntityMapper.mapEntityToCocktail(updatedCocktail, updatedIsFavorite)))
+                            }
+                        }
+                    }
+                    is Resource.Error -> {
+                        // If remote fetch fails, we already emitted the cached data, so no need to emit error
+                    }
+                    is Resource.Loading -> {
+                        // This shouldn't happen since remoteDataSource returns either Success or Error
+                    }
                 }
+            } catch (e: Exception) {
+                // If fetching from remote fails, we already emitted cached data, so just log the error
+                Log.e("CocktailRepositoryImpl", "Error updating cocktail details: ${e.message}")
             }
-            is Resource.Error -> {
-                // If cache is available, don't emit error but use cached data
+        } else {
+            // If not in cache, fetch from API
+            try {
+                when (val remoteResult = remoteDataSource.getCocktailDetails(id)) {
+                    is Resource.Success -> {
+                        // Map DrinkListResponse to Cocktail object
+                        val cocktailFromApi = CocktailMapper.mapDrinkListResponseToCocktails(remoteResult.data).firstOrNull()
+                        
+                        if (cocktailFromApi != null) {
+                            // Update the cache
+                            val entity = EntityMapper.mapCocktailToEntity(cocktailFromApi)
+                            localDataSource.saveCocktail(entity)
+                            
+                            // Update with favorite status
+                            val isFavorite = localDataSource.isFavorite(id) || favoritesLocalDataSource.isFavorite(id)
+                            emit(Resource.Success(cocktailFromApi.copy(isFavorite = isFavorite)))
+                        } else {
+                            emit(Resource.error("Cocktail details not found"))
+                        }
+                    }
+                    is Resource.Error -> {
+                        emit(remoteResult)
+                    }
+                    is Resource.Loading -> {
+                        // This shouldn't happen since remoteDataSource returns either Success or Error
+                    }
+                }
+            } catch (e: Exception) {
+                // If the API call fails and we don't have cached data, emit the error
+                val cachedCocktail = localDataSource.getCocktailById(id)
                 if (cachedCocktail != null) {
-                    val isFavorite = localDataSource.isFavorite(id)
+                    val isFavorite = localDataSource.isFavorite(id) || favoritesLocalDataSource.isFavorite(id)
                     emit(Resource.Success(EntityMapper.mapEntityToCocktail(cachedCocktail, isFavorite)))
                 } else {
-                    emit(apiResult)
+                    emit(Resource.error("Failed to get cocktail details: ${e.message}"))
                 }
-            }
-            is Resource.Loading -> {
-                // This shouldn't happen since remoteDataSource returns either Success or Error
             }
         }
     }
 
     override suspend fun saveFavorite(cocktail: Cocktail): Flow<Resource<Boolean>> = flow {
         emit(Resource.Loading)
-        
         try {
-            // Save to local database first
-            val entity = EntityMapper.mapCocktailToEntity(cocktail)
-            localDataSource.saveCocktail(entity)
-            
-            // Add to favorites
+            // Save to both favorite systems for consistency
+            favoritesLocalDataSource.saveFavorite(cocktail)
             localDataSource.addFavorite(cocktail.id)
-            
             emit(Resource.Success(true))
         } catch (e: Exception) {
-            emit(Resource.error(ApiError(
-                message = "Failed to save favorite: ${e.localizedMessage}",
-                throwable = e
-            )))
+            emit(Resource.error("Failed to save favorite: ${e.message}"))
         }
     }
 
     override suspend fun removeFavorite(id: String): Flow<Resource<Boolean>> = flow {
         emit(Resource.Loading)
-        
         try {
-            // Remove from favorites
+            // Remove from both favorite systems for consistency
+            favoritesLocalDataSource.removeFavorite(id)
             localDataSource.removeFavorite(id)
-            
             emit(Resource.Success(true))
         } catch (e: Exception) {
-            emit(Resource.error(ApiError(
-                message = "Failed to remove favorite: ${e.localizedMessage}",
-                throwable = e
-            )))
+            emit(Resource.error("Failed to remove favorite: ${e.message}"))
         }
     }
 
     override suspend fun getFavorites(): Flow<Resource<List<Cocktail>>> = flow {
         emit(Resource.Loading)
-        
         try {
-            // Get all favorites from local database
-            localDataSource.getFavorites()
-                .map { entities ->
-                    Resource.Success(
-                        EntityMapper.mapEntitiesToCocktails(
-                            entities,
-                            entities.map { it.id }.toSet() // All these are favorites
-                        )
-                    )
-                }
-                .collect { emit(it) }
+            val favorites = localDataSource.getFavorites()
+            favorites.collect { cocktailEntities ->
+                val domainCocktails = EntityMapper.mapEntitiesToCocktails(
+                    cocktailEntities,
+                    favoriteIds = cocktailEntities.map { it.id }.toSet()
+                )
+                emit(Resource.Success(domainCocktails))
+            }
         } catch (e: Exception) {
-            emit(Resource.error(ApiError(
-                message = "Failed to get favorites: ${e.localizedMessage}",
-                throwable = e
-            )))
+            emit(Resource.error("Failed to get favorites: ${e.message}"))
+        }
+    }
+
+    override suspend fun isFavorite(id: String): Flow<Resource<Boolean>> = flow {
+        emit(Resource.Loading)
+        try {
+            val isSimpleFavorite = localDataSource.isFavorite(id)
+            val isFavoriteEntity = favoritesLocalDataSource.isFavorite(id)
+            
+            // Either system having it marked as favorite is sufficient
+            emit(Resource.Success(isSimpleFavorite || isFavoriteEntity))
+        } catch (e: Exception) {
+            emit(Resource.error("Failed to check favorite status: ${e.message}"))
         }
     }
 }

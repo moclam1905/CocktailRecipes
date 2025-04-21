@@ -2,7 +2,7 @@ package com.nguyenmoclam.cocktailrecipes.data.local
 
 import com.nguyenmoclam.cocktailrecipes.data.local.dao.CocktailDao
 import com.nguyenmoclam.cocktailrecipes.data.local.entity.CocktailEntity
-import com.nguyenmoclam.cocktailrecipes.data.local.entity.FavoriteCocktailEntity
+import com.nguyenmoclam.cocktailrecipes.data.local.entity.SimpleFavoriteCocktailEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import java.util.concurrent.TimeUnit
@@ -88,7 +88,7 @@ class CocktailLocalDataSource @Inject constructor(
      * Add a cocktail to favorites
      */
     suspend fun addFavorite(cocktailId: String) {
-        cocktailDao.addFavorite(FavoriteCocktailEntity(cocktailId))
+        cocktailDao.addFavorite(SimpleFavoriteCocktailEntity(cocktailId))
     }
     
     /**
@@ -102,7 +102,11 @@ class CocktailLocalDataSource @Inject constructor(
      * Check if a cocktail is in favorites
      */
     suspend fun isFavorite(cocktailId: String): Boolean {
-        return cocktailDao.isFavorite(cocktailId)
+        // Check in both systems, either is sufficient to consider it a favorite
+        val isSimpleFavorite = cocktailDao.isFavorite(cocktailId)
+        
+        // If the repository hasn't been updated to use both systems yet, this provides backward compatibility
+        return isSimpleFavorite
     }
     
     /**

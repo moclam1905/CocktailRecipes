@@ -12,11 +12,15 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.nguyenmoclam.cocktailrecipes.ui.detail.CocktailDetailScreen
+import com.nguyenmoclam.cocktailrecipes.ui.favorites.FavoritesScreen
 import com.nguyenmoclam.cocktailrecipes.ui.home.HomeScreen
+import com.nguyenmoclam.cocktailrecipes.ui.search.SearchScreen
 
 object NavDestinations {
     const val HOME = "home"
     const val COCKTAIL_DETAIL = "cocktail_detail"
+    const val SEARCH = "search"
+    const val FAVORITES = "favorites"
     const val COCKTAIL_ID_ARG = "cocktailId"
 }
 
@@ -64,6 +68,35 @@ fun AppNavigation(
             HomeScreen(
                 onCocktailClick = { cocktailId ->
                     navController.navigate("${NavDestinations.COCKTAIL_DETAIL}/$cocktailId")
+                },
+                onSearchClick = {
+                    navController.navigate(NavDestinations.SEARCH)
+                },
+                onFavoritesClick = {
+                    navController.navigate(NavDestinations.FAVORITES)
+                }
+            )
+        }
+        
+        composable(
+            route = NavDestinations.SEARCH
+        ) {
+            SearchScreen(
+                onCocktailClick = { cocktailId ->
+                    navController.navigate("${NavDestinations.COCKTAIL_DETAIL}/$cocktailId")
+                }
+            )
+        }
+        
+        composable(
+            route = NavDestinations.FAVORITES
+        ) {
+            FavoritesScreen(
+                onCocktailClick = { cocktailId ->
+                    navController.navigate("${NavDestinations.COCKTAIL_DETAIL}/$cocktailId")
+                },
+                onBackPressed = {
+                    navController.popBackStack()
                 }
             )
         }

@@ -6,7 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.nguyenmoclam.cocktailrecipes.data.local.entity.CocktailEntity
-import com.nguyenmoclam.cocktailrecipes.data.local.entity.FavoriteCocktailEntity
+import com.nguyenmoclam.cocktailrecipes.data.local.entity.SimpleFavoriteCocktailEntity
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -55,24 +55,24 @@ interface CocktailDao {
      * Add a cocktail to favorites
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addFavorite(favorite: FavoriteCocktailEntity)
+    suspend fun addFavorite(favorite: SimpleFavoriteCocktailEntity)
     
     /**
      * Remove a cocktail from favorites
      */
-    @Query("DELETE FROM favorite_cocktails WHERE cocktailId = :cocktailId")
+    @Query("DELETE FROM favorite_cocktails_simple WHERE cocktailId = :cocktailId")
     suspend fun removeFavorite(cocktailId: String)
     
     /**
      * Check if a cocktail is favorited
      */
-    @Query("SELECT EXISTS(SELECT 1 FROM favorite_cocktails WHERE cocktailId = :cocktailId LIMIT 1)")
+    @Query("SELECT EXISTS(SELECT 1 FROM favorite_cocktails_simple WHERE cocktailId = :cocktailId LIMIT 1)")
     suspend fun isFavorite(cocktailId: String): Boolean
     
     /**
      * Get all favorite cocktails
      */
     @Transaction
-    @Query("SELECT c.* FROM cocktails c INNER JOIN favorite_cocktails f ON c.id = f.cocktailId ORDER BY f.addedAt DESC")
+    @Query("SELECT c.* FROM cocktails c INNER JOIN favorite_cocktails_simple f ON c.id = f.cocktailId ORDER BY f.addedAt DESC")
     fun getFavoriteCocktails(): Flow<List<CocktailEntity>>
 } 

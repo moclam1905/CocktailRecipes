@@ -1,5 +1,6 @@
 package com.nguyenmoclam.cocktailrecipes.data.remote
 
+import com.nguyenmoclam.cocktailrecipes.data.common.DrinksListAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -29,6 +30,7 @@ object NetworkModule {
     @Singleton
     fun provideMoshi(): Moshi {
         return Moshi.Builder()
+            .add(DrinksListAdapter.FACTORY)
             .add(KotlinJsonAdapterFactory())
             .build()
     }
