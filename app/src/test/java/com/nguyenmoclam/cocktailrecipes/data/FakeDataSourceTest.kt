@@ -1,18 +1,7 @@
 package com.nguyenmoclam.cocktailrecipes.data
 
-import com.nguyenmoclam.cocktailrecipes.data.common.Resource
 import com.nguyenmoclam.cocktailrecipes.data.local.FakeCocktailLocalDataSource
 import com.nguyenmoclam.cocktailrecipes.data.remote.FakeCocktailRemoteDataSource
-
-// Temporary workarounds for unresolved references
-// Remove after fixing Gradle dependencies
-object Assert {
-    fun assertEquals(expected: Any?, actual: Any?) {}
-    fun assertTrue(condition: Boolean) {}
-    fun assertFalse(condition: Boolean) {}
-    fun assertNull(obj: Any?) {}
-    fun assertNotNull(obj: Any?) {}
-}
 
 annotation class Test
 annotation class Before

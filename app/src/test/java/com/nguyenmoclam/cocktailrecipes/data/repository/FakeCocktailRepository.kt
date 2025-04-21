@@ -191,7 +191,27 @@ class FakeCocktailRepository : CocktailRepository {
         val data = if (shouldReturnEmpty) emptyList() else favoriteCocktails
         emit(Resource.Success(data))
     }
-    
+
+    override suspend fun isFavorite(id: String): Flow<Resource<Boolean>> = flow {
+        if (shouldReturnLoading) {
+            emit(Resource.Loading)
+            // Don't return here, allow subsequent emits
+        }
+
+        if (shouldReturnError) {
+            emit(createErrorResource<Boolean>()) // Specify type argument for generic function
+            return@flow
+        }
+        
+        // Simulate potential delay if configured
+        if (delayTimeMillis > 0) {
+            kotlinx.coroutines.delay(delayTimeMillis)
+        }
+        
+        val isFav = favorites.contains(id)
+        emit(Resource.Success(isFav))
+    }
+
     /**
      * Helper function to create appropriate error resource based on settings
      */

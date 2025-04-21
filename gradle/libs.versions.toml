@@ -1,7 +1,10 @@
 [versions]
 accompanistSystemuicontroller = "0.32.0"
 agp = "8.8.1"
+androidxJunit = "1.1.5"
 animationGraphics = "1.7.8"
+coreKtxVersion = "1.5.0"
+espressoCoreVersion = "3.5.1"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -26,7 +29,9 @@ hiltCompiler = "1.2.0"
 moshi = "1.15.1"
 lifecycle-runtime-compose = "2.8.7"
 compose-material = "1.6.5"
+runner = "1.5.2"
 turbine = "1.0.0"
+uiTest = "1.5.4"
 uiUtil = "1.7.8"
 workManager = "2.9.0"
 timber = "5.0.1"
@@ -40,8 +45,14 @@ androidx-animation = { module = "androidx.compose.animation:animation", version.
 androidx-animation-core = { module = "androidx.compose.animation:animation-core", version.ref = "animationGraphics" }
 androidx-animation-graphics = { module = "androidx.compose.animation:animation-graphics", version.ref = "animationGraphics" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-espresso-core-v351 = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCoreVersion" }
+androidx-junit-v115 = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+androidx-rules = { module = "androidx.test:rules", version.ref = "coreKtxVersion" }
+androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
+androidx-ui-test = { module = "androidx.compose.ui:ui-test", version.ref = "uiTest" }
 androidx-ui-util = { module = "androidx.compose.ui:ui-util", version.ref = "uiUtil" }
+core-ktx = { module = "androidx.test:core-ktx", version.ref = "coreKtxVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -96,6 +107,9 @@ retrofit-converter-moshi = { group = "com.squareup.retrofit2", name = "converter
 
 # WorkManager for background tasks
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "uiTest" }
+ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "uiTest" }
+ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiTest" }
 workmanager-runtime = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
 workmanager-hilt = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltCompiler" }
 

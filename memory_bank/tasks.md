@@ -81,11 +81,11 @@
   - [x] Write ViewModel tests (3h)
   - [x] Test use cases and business logic (2h)
   - [x] Create test utilities and fixtures (2h)
-- [ ] Perform UI testing
-  - [ ] Set up Compose UI testing framework (2h)
-  - [ ] Create end-to-end tests for main user flows (4h)
-  - [ ] Test screen navigation and state preservation (2h)
-  - [ ] Verify accessibility compliance (2h)
+- [x] Perform UI testing
+  - [x] Set up Compose UI testing framework (2h)
+  - [x] Create end-to-end tests for main user flows (4h)
+  - [x] Test screen navigation and state preservation (2h)
+  - [x] Verify accessibility compliance (2h)
 
 ## Phase 5: Improve some features:
 - [ ] Implement API optimization enhancements

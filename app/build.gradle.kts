@@ -126,12 +126,21 @@ dependencies {
     // MockWebServer for API testing
     testImplementation(libs.mockwebserver)
     
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+    // Android Testing - using specific versions instead of BOM for compatibility
+    androidTestImplementation(libs.androidx.junit.v115)
+    androidTestImplementation(libs.androidx.espresso.core.v351)
+    
+    // Compose testing with specific versions
+    androidTestImplementation(libs.androidx.ui.test)
+    androidTestImplementation(libs.ui.test.junit4)
+    androidTestImplementation(libs.core.ktx)
+    androidTestImplementation(libs.androidx.runner)
+    androidTestImplementation(libs.androidx.rules)
+    androidTestImplementation(libs.coroutines.test)
+    
+    // Debug implementations for UI testing
+    debugImplementation(libs.ui.tooling)
+    debugImplementation(libs.ui.test.manifest)
 
     // Material Icons Extended
     implementation(libs.androidx.compose.material.icons.extended)
