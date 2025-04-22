@@ -124,13 +124,13 @@
     - [x] Create dashboard or logging visualization for performance metrics (1h)
 
 ## Phase 7: New Free-API Features
-- [ ] Implement "Surprise Me!" Random Cocktail Feature
-  - [ ] Create a "Surprise Me" button on Home screen (1h)
-  - [ ] Implement Random Cocktail API integration using random.php endpoint (1h)
-  - [ ] UI/UX: Implement Shake-to-Activate gesture (1h)
-  - [ ] UI/UX: Add 3D Card Flip animation for result reveal (1.5h)
-  - [ ] UI/UX: Add loading animation (pouring cocktail) (1h)
-  - [ ] Implement navigation to cocktail details on selection (0.5h)
+- [x] Implement "Surprise Me!" Random Cocktail Feature
+  - [x] Create a "Surprise Me" button on Home screen (1h)
+  - [x] Implement Random Cocktail API integration using random.php endpoint (1h)
+  - [x] UI/UX: Implement Shake-to-Activate gesture (1h)
+  - [x] UI/UX: Add 3D Card Flip animation for result reveal (1.5h)
+  - [x] UI/UX: Add loading animation (pouring cocktail) (1h)
+  - [x] Implement navigation to cocktail details on selection (0.5h)
 - [ ] Develop Ingredient Explorer Feature
   - [ ] Create Ingredient Explorer screen foundation (1h)
   - [ ] Implement API call to fetch all ingredients using list.php?i=list (1h)

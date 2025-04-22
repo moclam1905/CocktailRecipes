@@ -22,6 +22,7 @@ Built with cutting-edge Android development practices, this app also showcases t
 - 📝 **Details** - Get comprehensive instructions, ingredient lists, and beautiful images
 - ⚙️ **Settings** - Customize your experience with theme selection and cache management
 - 📊 **Analytics** - View API performance metrics and optimize app experience
+- 🎲 **Surprise Me!** - Shake your device to discover random cocktails with beautiful animations
 
 ## 🧪 Did You Know?
 
@@ -113,6 +114,15 @@ The application follows the MVVM (Model-View-ViewModel) architecture pattern wit
     - Added reporting system for slow or failed API calls
     - Created API performance dashboard with metrics visualization
     - Fixed dependency cycle between analytics components using Dagger Provider
+- ✅ **"Surprise Me!" Random Cocktail Feature**
+  - Created a "Surprise Me" floating action button on Home screen
+  - Implemented Random Cocktail API integration using random.php endpoint
+  - Added Shake-to-Activate gesture functionality with ShakeDetector
+  - Implemented 3D Card Flip animation for result reveal
+  - Created custom loading animation (pouring cocktail)
+  - Added navigation to cocktail details on selection
+  - Fixed dialog state management to prevent unwanted display when returning to Home screen
+  - Fixed favorite toggle functionality in random cocktail dialog
 
 ### In Progress
 - 🚧 **API Optimization Enhancements (continuing)**
@@ -124,7 +134,6 @@ The application follows the MVVM (Model-View-ViewModel) architecture pattern wit
 
 ### Coming Soon
 - 🔮 **New Features**
-  - "Surprise Me!" Random Cocktail Feature
   - Ingredient Explorer with visual grid
   - Advanced Filtering Options
   - "Mocktail Corner" for non-alcoholic options

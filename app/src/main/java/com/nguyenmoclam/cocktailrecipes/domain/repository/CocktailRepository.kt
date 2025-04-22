@@ -80,4 +80,15 @@ interface CocktailRepository {
      * Invalidate all caches to force a refresh on next data fetch
      */
     suspend fun invalidateAllCaches(): Flow<Resource<Boolean>>
+    
+    /**
+     * Get a random cocktail
+     */
+    suspend fun getRandomCocktail(): Flow<Resource<Cocktail>>
+    
+    /**
+     * Get a random cocktail with force refresh option
+     * @param forceRefresh If true, ignores cache and fetches fresh data
+     */
+    suspend fun getRandomCocktail(forceRefresh: Boolean): Flow<Resource<Cocktail>>
 } 

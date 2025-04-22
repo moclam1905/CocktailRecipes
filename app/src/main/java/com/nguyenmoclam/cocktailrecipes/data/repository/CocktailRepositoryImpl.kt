@@ -332,4 +332,45 @@ class CocktailRepositoryImpl @Inject constructor(
             emit(Resource.error("Failed to invalidate caches: ${e.message}"))
         }
     }
+    
+    override suspend fun getRandomCocktail(): Flow<Resource<Cocktail>> =
+        getRandomCocktail(forceRefresh = false)
+    
+    override suspend fun getRandomCocktail(forceRefresh: Boolean): Flow<Resource<Cocktail>> = flow {
+        emit(Resource.Loading)
+        
+        // If offline, inform user
+        if (!networkMonitor.isNetworkAvailable()) {
+            emit(Resource.error(ApiError.networkError("No internet connection. Cannot get a random cocktail offline.")))
+            return@flow
+        }
+        
+        // For random cocktail, we always rely on the API
+        when (val apiResult = remoteDataSource.getRandomCocktail()) {
+            is Resource.Success -> {
+                val cocktails = CocktailMapper.mapDrinkListResponseToCocktails(apiResult.data)
+                val randomCocktail = cocktails.firstOrNull()
+                
+                if (randomCocktail != null) {
+                    // Cache the result
+                    val entity = EntityMapper.mapCocktailToEntity(randomCocktail)
+                    localDataSource.saveCocktail(entity)
+                    
+                    // Check if the cocktail is a favorite
+                    val isFavorite = localDataSource.isFavorite(randomCocktail.id) || 
+                                    favoritesLocalDataSource.isFavorite(randomCocktail.id)
+                    
+                    emit(Resource.Success(randomCocktail.copy(isFavorite = isFavorite)))
+                } else {
+                    emit(Resource.error("No random cocktail found."))
+                }
+            }
+            is Resource.Error -> {
+                emit(apiResult)
+            }
+            is Resource.Loading -> {
+                // This shouldn't happen since remoteDataSource returns either Success or Error
+            }
+        }
+    }
 }

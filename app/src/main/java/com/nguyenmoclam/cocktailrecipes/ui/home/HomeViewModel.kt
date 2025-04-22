@@ -19,7 +19,11 @@ data class HomeUiState(
     val cocktails: List<Cocktail> = emptyList(),
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val randomCocktail: Cocktail? = null,
+    val isLoadingRandom: Boolean = false,
+    val randomCocktailError: String? = null,
+    val showRandomCocktail: Boolean = false
 )
 
 /**
@@ -30,6 +34,8 @@ sealed class HomeEvent {
     object RefreshCocktails : HomeEvent()
     data class ToggleFavorite(val cocktailId: String) : HomeEvent()
     data class NavigateToDetails(val cocktailId: String) : HomeEvent()
+    object GetRandomCocktail : HomeEvent()
+    object DismissRandomCocktail : HomeEvent()
 }
 
 /**
@@ -51,6 +57,10 @@ class HomeViewModel @Inject constructor(
             is HomeEvent.ToggleFavorite -> toggleFavorite(event.cocktailId)
             is HomeEvent.NavigateToDetails -> {
                 // Navigation will be handled by the NavController in the UI
+            }
+            is HomeEvent.GetRandomCocktail -> getRandomCocktail()
+            is HomeEvent.DismissRandomCocktail -> {
+                updateState { it.copy(showRandomCocktail = false) }
             }
         }
     }
@@ -148,7 +158,16 @@ class HomeViewModel @Inject constructor(
      */
     private fun toggleFavorite(cocktailId: String) {
         viewModelScope.launch {
-            val cocktail = uiState.value.cocktails.find { it.id == cocktailId } ?: return@launch
+            // First try to find the cocktail in the main list
+            var cocktail = uiState.value.cocktails.find { it.id == cocktailId }
+            
+            // If not found in the main list, check if it's the random cocktail
+            if (cocktail == null && uiState.value.randomCocktail?.id == cocktailId) {
+                cocktail = uiState.value.randomCocktail
+            }
+            
+            // If still not found, return early
+            if (cocktail == null) return@launch
             
             val repository = if (cocktail.isFavorite) {
                 cocktailRepository.removeFavorite(cocktailId)
@@ -164,8 +183,69 @@ class HomeViewModel @Inject constructor(
                             val updatedCocktails = it.cocktails.map { c ->
                                 if (c.id == cocktailId) c.copy(isFavorite = !c.isFavorite) else c
                             }
-                            it.copy(cocktails = updatedCocktails)
+                            
+                            // Also update the random cocktail if that's what was favorited
+                            val updatedRandomCocktail = if (it.randomCocktail?.id == cocktailId) {
+                                it.randomCocktail.copy(isFavorite = !it.randomCocktail.isFavorite)
+                            } else {
+                                it.randomCocktail
+                            }
+                            
+                            it.copy(
+                                cocktails = updatedCocktails,
+                                randomCocktail = updatedRandomCocktail
+                            )
                         }
+                    }
+                }
+                .launchIn(viewModelScope)
+        }
+    }
+
+    /**
+     * Get a random cocktail
+     */
+    private fun getRandomCocktail() {
+        viewModelScope.launch {
+            updateState { 
+                it.copy(
+                    isLoadingRandom = true, 
+                    randomCocktailError = null,
+                    showRandomCocktail = true
+                ) 
+            }
+
+            cocktailRepository.getRandomCocktail()
+                .onEach { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            updateState { 
+                                it.copy(
+                                    randomCocktail = result.data,
+                                    isLoadingRandom = false,
+                                    randomCocktailError = null
+                                )
+                            }
+                        }
+                        is Resource.Error -> {
+                            updateState { 
+                                it.copy(
+                                    isLoadingRandom = false,
+                                    randomCocktailError = result.apiError.getUserFriendlyMessage()
+                                )
+                            }
+                        }
+                        is Resource.Loading -> {
+                            updateState { it.copy(isLoadingRandom = true) }
+                        }
+                    }
+                }
+                .catch { e ->
+                    updateState { 
+                        it.copy(
+                            isLoadingRandom = false,
+                            randomCocktailError = e.message ?: "Unknown error occurred"
+                        )
                     }
                 }
                 .launchIn(viewModelScope)
