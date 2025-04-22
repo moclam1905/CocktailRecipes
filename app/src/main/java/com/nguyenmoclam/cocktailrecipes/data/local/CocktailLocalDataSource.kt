@@ -115,4 +115,28 @@ class CocktailLocalDataSource @Inject constructor(
     fun getFavorites(): Flow<List<CocktailEntity>> {
         return cocktailDao.getFavoriteCocktails()
     }
+    
+    /**
+     * Force invalidate cache for specific cocktail or all cocktails
+     * @param cocktailId Optional ID of specific cocktail to invalidate, or null for all
+     */
+    suspend fun invalidateCache(cocktailId: String? = null) {
+        if (cocktailId != null) {
+            // Invalidate specific cocktail by updating its timestamp to be outside validity period
+            val cocktail = getCocktailById(cocktailId)
+            cocktail?.let {
+                val invalidTimestamp = System.currentTimeMillis() - cacheValidityPeriod - 1000
+                val updatedCocktail = it.copy(lastUpdated = invalidTimestamp)
+                saveCocktail(updatedCocktail)
+            }
+        } else {
+            // Invalidate all cached cocktails
+            val cocktails = cocktailDao.getCocktails().firstOrNull() ?: emptyList()
+            val invalidTimestamp = System.currentTimeMillis() - cacheValidityPeriod - 1000
+            val updatedCocktails = cocktails.map { it.copy(lastUpdated = invalidTimestamp) }
+            if (updatedCocktails.isNotEmpty()) {
+                saveCocktails(updatedCocktails)
+            }
+        }
+    }
 } 

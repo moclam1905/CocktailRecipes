@@ -68,11 +68,11 @@ fun SettingsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    
+
     // Get string resources within Composable scope
     val cacheClearedMessage = stringResource(R.string.cache_cleared)
     val backContentDesc = stringResource(R.string.back)
-    
+
     // Show snackbar when cache is cleared
     LaunchedEffect(uiState.cacheCleared) {
         if (uiState.cacheCleared) {
@@ -82,7 +82,7 @@ fun SettingsScreen(
             )
         }
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -91,14 +91,14 @@ fun SettingsScreen(
                     IconButton(
                         onClick = onBackPressed,
                         // Use the retrieved string here
-                        modifier = Modifier.semantics { 
+                        modifier = Modifier.semantics {
                             contentDescription = backContentDesc
                         }
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             // stringResource is okay here as it's directly in Icon's content
-                            contentDescription = stringResource(R.string.back) 
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
                 }
@@ -118,28 +118,28 @@ fun SettingsScreen(
                 currentTheme = uiState.themeMode,
                 onThemeSelected = viewModel::setThemeMode
             )
-            
+
             Divider()
-            
+
             // Cache Clearing
             CacheClearingSection(
                 isClearing = uiState.isCacheClearing,
                 onClearCache = viewModel::showClearCacheConfirmation
             )
-            
+
             Divider()
-            
+
             // About Section
             AboutSection(appVersion = uiState.appVersion)
         }
     }
-    
+
     // Confirmation dialog for cache clearing
     if (uiState.showClearCacheConfirmation) {
         AlertDialog(
             onDismissRequest = viewModel::dismissClearCacheConfirmation,
             title = { Text(stringResource(R.string.cache_confirmation_title)) },
-            text = { 
+            text = {
                 Text(stringResource(R.string.cache_confirmation_message))
             },
             confirmButton = {
@@ -180,7 +180,7 @@ fun ThemeSelectionSection(
                 style = MaterialTheme.typography.titleMedium
             )
         }
-        
+
         Column(Modifier.selectableGroup()) {
             ThemeOption(
                 text = stringResource(R.string.theme_system),
@@ -188,14 +188,14 @@ fun ThemeSelectionSection(
                 selected = currentTheme == PreferencesManager.THEME_MODE_SYSTEM,
                 onClick = { onThemeSelected(PreferencesManager.THEME_MODE_SYSTEM) }
             )
-            
+
             ThemeOption(
                 text = stringResource(R.string.theme_light),
                 icon = Icons.Default.Brightness7,
                 selected = currentTheme == PreferencesManager.THEME_MODE_LIGHT,
                 onClick = { onThemeSelected(PreferencesManager.THEME_MODE_LIGHT) }
             )
-            
+
             ThemeOption(
                 text = stringResource(R.string.theme_dark),
                 icon = Icons.Default.Brightness4,
@@ -225,7 +225,7 @@ fun ThemeOption(
             .padding(horizontal = 16.dp)
             .semantics {
                 // Pass the already resolved string
-                contentDescription = text 
+                contentDescription = text
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -252,7 +252,7 @@ fun CacheClearingSection(
 ) {
     // Get string resource within Composable scope
     val clearButtonDesc = stringResource(R.string.clear_button)
-    
+
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -292,7 +292,7 @@ fun CacheClearingSection(
                 Button(
                     onClick = onClearCache,
                     // Use the retrieved string here
-                    modifier = Modifier.semantics { 
+                    modifier = Modifier.semantics {
                         contentDescription = clearButtonDesc
                     }
                 ) {
@@ -323,7 +323,7 @@ fun AboutSection(appVersion: String) {
                 style = MaterialTheme.typography.titleMedium
             )
         }
-        
+
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -374,7 +374,7 @@ fun SettingsScreenPreview() {
                 )
             )
         }
-        
+
         SettingsScreen(
             onBackPressed = {},
             viewModel = previewViewModel
@@ -399,7 +399,7 @@ fun SettingsScreenDarkPreview() {
                 )
             )
         }
-        
+
         SettingsScreen(
             onBackPressed = {},
             viewModel = previewViewModel
@@ -412,5 +412,6 @@ private class FakeSettingsRepository : SettingsRepository {
     override fun getThemeMode(): Flow<String> = flowOf(PreferencesManager.THEME_MODE_SYSTEM)
     override suspend fun setThemeMode(mode: String) {}
     override suspend fun clearAppCache(): Boolean = true
+    override suspend fun clearApiCache(): Boolean = true
     override suspend fun getAppVersion(): String = "1.0.0 (1)"
 } 

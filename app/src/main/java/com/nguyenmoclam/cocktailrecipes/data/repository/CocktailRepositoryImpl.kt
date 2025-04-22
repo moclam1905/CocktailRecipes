@@ -1,5 +1,6 @@
 package com.nguyenmoclam.cocktailrecipes.data.repository
 
+import android.util.Log
 import com.nguyenmoclam.cocktailrecipes.data.common.ApiError
 import com.nguyenmoclam.cocktailrecipes.data.common.NetworkMonitor
 import com.nguyenmoclam.cocktailrecipes.data.common.Resource
@@ -17,7 +18,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
-import android.util.Log
 
 /**
  * Implementation of CocktailRepository
@@ -31,18 +31,26 @@ class CocktailRepositoryImpl @Inject constructor(
     private val networkMonitor: NetworkMonitor
 ) : CocktailRepository {
 
-    override suspend fun getPopularCocktails(): Flow<Resource<List<Cocktail>>> = flow {
+    override suspend fun getPopularCocktails(): Flow<Resource<List<Cocktail>>> = 
+        getPopularCocktails(forceRefresh = false)
+    
+    override suspend fun getPopularCocktails(forceRefresh: Boolean): Flow<Resource<List<Cocktail>>> = flow {
         emit(Resource.Loading)
         
-        // Try to get data from cache first
-        if (localDataSource.isCacheValid()) {
+        // If force refresh, invalidate cache
+        if (forceRefresh) {
+            localDataSource.invalidateCache()
+        }
+        
+        // Try to get data from cache first if not forced and cache is valid
+        if (!forceRefresh && localDataSource.isCacheValid()) {
             val cachedCocktails = localDataSource.getCocktails().first()
             val domainCocktails = EntityMapper.mapEntitiesToCocktails(cachedCocktails)
             emit(Resource.Success(domainCocktails))
         }
         
         // If offline and cache is not valid, return offline error
-        if (!networkMonitor.isNetworkAvailable() && !localDataSource.isCacheValid()) {
+        if (!networkMonitor.isNetworkAvailable() && (!localDataSource.isCacheValid() || forceRefresh)) {
             emit(Resource.error(ApiError.networkError("No internet connection. Using cached data.")))
             return@flow
         }
@@ -77,19 +85,35 @@ class CocktailRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun searchCocktailsByName(query: String): Flow<Resource<List<Cocktail>>> = flow {
+    override suspend fun searchCocktailsByName(query: String): Flow<Resource<List<Cocktail>>> =
+        searchCocktailsByName(query, forceRefresh = false)
+    
+    override suspend fun searchCocktailsByName(query: String, forceRefresh: Boolean): Flow<Resource<List<Cocktail>>> = flow {
         emit(Resource.Loading)
         
-        // Try local search first for better responsiveness
-        val localResults = localDataSource.searchCocktailsByName(query)
-        if (localResults.isNotEmpty()) {
-            emit(Resource.Success(EntityMapper.mapEntitiesToCocktails(localResults)))
+        // If force refresh, invalidate the cache
+        if (forceRefresh) {
+            localDataSource.invalidateCache()
+        }
+        
+        // Try local search first for better responsiveness if not forcing refresh
+        if (!forceRefresh) {
+            val localResults = localDataSource.searchCocktailsByName(query)
+            if (localResults.isNotEmpty()) {
+                emit(Resource.Success(EntityMapper.mapEntitiesToCocktails(localResults)))
+            }
         }
         
         // If offline, return only local results with a message
         if (!networkMonitor.isNetworkAvailable()) {
+            val localResults = localDataSource.searchCocktailsByName(query)
             if (localResults.isEmpty()) {
                 emit(Resource.error(ApiError.networkError("No internet connection. No matching cocktails found in cache.")))
+            } else if (!forceRefresh) {
+                // We've already emitted the local results above
+            } else {
+                // We're forcing refresh but offline, so emit the local results now
+                emit(Resource.Success(EntityMapper.mapEntitiesToCocktails(localResults)))
             }
             return@flow
         }
@@ -109,7 +133,8 @@ class CocktailRepositoryImpl @Inject constructor(
             }
             is Resource.Error -> {
                 // If we already emitted local results, don't emit error
-                if (localResults.isEmpty()) {
+                val localResults = localDataSource.searchCocktailsByName(query)
+                if (localResults.isEmpty() || forceRefresh) {
                     emit(apiResult)
                 }
             }
@@ -119,7 +144,10 @@ class CocktailRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun searchCocktailsByIngredient(ingredient: String): Flow<Resource<List<Cocktail>>> = flow {
+    override suspend fun searchCocktailsByIngredient(ingredient: String): Flow<Resource<List<Cocktail>>> =
+        searchCocktailsByIngredient(ingredient, forceRefresh = false)
+    
+    override suspend fun searchCocktailsByIngredient(ingredient: String, forceRefresh: Boolean): Flow<Resource<List<Cocktail>>> = flow {
         emit(Resource.Loading)
         
         // If offline, inform user
@@ -150,13 +178,22 @@ class CocktailRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getCocktailDetails(id: String): Flow<Resource<Cocktail>> = flow {
+    override suspend fun getCocktailDetails(id: String): Flow<Resource<Cocktail>> =
+        getCocktailDetails(id, forceRefresh = false)
+    
+    override suspend fun getCocktailDetails(id: String, forceRefresh: Boolean): Flow<Resource<Cocktail>> = flow {
         emit(Resource.Loading)
         
-        // Check if the cocktail is in the local cache
-        val cachedCocktail = localDataSource.getCocktailById(id)
+        // If force refresh, invalidate the specific cocktail cache
+        if (forceRefresh) {
+            localDataSource.invalidateCache(id)
+        }
         
-        if (cachedCocktail != null) {
+        // Check if the cocktail is in the local cache and valid
+        val cachedCocktail = localDataSource.getCocktailById(id)
+        val isCacheValid = localDataSource.isCacheValid(id)
+        
+        if (cachedCocktail != null && isCacheValid && !forceRefresh) {
             // Get favorite status from local data source
             val isFavorite = localDataSource.isFavorite(id) || favoritesLocalDataSource.isFavorite(id)
             emit(Resource.Success(EntityMapper.mapEntityToCocktail(cachedCocktail, isFavorite)))
@@ -283,6 +320,16 @@ class CocktailRepositoryImpl @Inject constructor(
             emit(Resource.Success(isSimpleFavorite || isFavoriteEntity))
         } catch (e: Exception) {
             emit(Resource.error("Failed to check favorite status: ${e.message}"))
+        }
+    }
+
+    override suspend fun invalidateAllCaches(): Flow<Resource<Boolean>> = flow {
+        emit(Resource.Loading)
+        try {
+            localDataSource.invalidateCache()
+            emit(Resource.Success(true))
+        } catch (e: Exception) {
+            emit(Resource.error("Failed to invalidate caches: ${e.message}"))
         }
     }
 }

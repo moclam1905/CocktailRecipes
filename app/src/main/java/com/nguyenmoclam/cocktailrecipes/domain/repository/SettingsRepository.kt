@@ -10,6 +10,9 @@ interface SettingsRepository {
     // Cache management
     suspend fun clearAppCache(): Boolean
     
+    // API cache management
+    suspend fun clearApiCache(): Boolean
+    
     // App info
     suspend fun getAppVersion(): String
 } 

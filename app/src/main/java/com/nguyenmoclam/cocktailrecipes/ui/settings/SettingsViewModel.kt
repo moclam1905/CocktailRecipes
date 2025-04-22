@@ -19,7 +19,9 @@ data class SettingsUiState(
     val appVersion: String = "",
     val isCacheClearing: Boolean = false,
     val cacheCleared: Boolean = false,
-    val showClearCacheConfirmation: Boolean = false
+    val showClearCacheConfirmation: Boolean = false,
+    val isApiCacheClearing: Boolean = false,
+    val apiCacheCleared: Boolean = false
 )
 
 @HiltViewModel
@@ -69,9 +71,22 @@ open class SettingsViewModel @Inject constructor(
 
     fun clearCache() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isCacheClearing = true, showClearCacheConfirmation = false) }
-            val success = settingsRepository.clearAppCache()
-            _uiState.update { it.copy(isCacheClearing = false, cacheCleared = success) }
+            _uiState.update { it.copy(isCacheClearing = true, isApiCacheClearing = true, showClearCacheConfirmation = false) }
+            
+            // Clear app database cache
+            val appCacheSuccess = settingsRepository.clearAppCache()
+            
+            // Clear API HTTP cache
+            val apiCacheSuccess = settingsRepository.clearApiCache()
+            
+            _uiState.update { 
+                it.copy(
+                    isCacheClearing = false, 
+                    isApiCacheClearing = false,
+                    cacheCleared = appCacheSuccess,
+                    apiCacheCleared = apiCacheSuccess
+                ) 
+            }
         }
     }
 } 

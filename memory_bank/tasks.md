@@ -106,12 +106,12 @@
   - [x] Add basic info text (e.g., developer, data source) (0.5h)
 
 ## Phase 6: Improve some features:
-- [ ] Implement API optimization enhancements
-  - [ ] Add HTTP caching to reduce API calls (2h)
-    - [ ] Configure OkHttp cache interceptor with appropriate cache size (0.5h)
-    - [ ] Implement cache control headers for GET requests (0.5h)
-    - [ ] Add cache invalidation logic for time-sens6tive data (0.5h)
-    - [ ] Create mechanism to force refresh data regardless of cache (0.5h)
+- [x] Implement API optimization enhancements
+  - [x] Add HTTP caching to reduce API calls (2h)
+    - [x] Configure OkHttp cache interceptor with appropriate cache size (0.5h)
+    - [x] Implement cache control headers for GET requests (0.5h)
+    - [x] Add cache invalidation logic for time-sens6tive data (0.5h)
+    - [x] Create mechanism to force refresh data regardless of cache (0.5h)
   - [ ] Implement rate limiting protection (1h)
     - [ ] Create rate limit interceptor to track API calls (0.5h)
     - [ ] Implement exponential backoff for rate limit responses (0.5h)

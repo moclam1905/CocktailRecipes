@@ -110,6 +110,9 @@ dependencies {
     // WorkManager for background processing
     implementation(libs.workmanager.runtime)
     implementation(libs.workmanager.hilt)
+
+    // Material Icons Extended
+    implementation(libs.androidx.compose.material.icons.extended)
     
     // Logging
     implementation(libs.timber)
@@ -146,6 +149,4 @@ dependencies {
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
 
-    // Material Icons Extended
-    implementation(libs.androidx.compose.material.icons.extended)
 }
