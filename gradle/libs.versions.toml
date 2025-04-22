@@ -4,6 +4,7 @@ agp = "8.8.1"
 androidxJunit = "1.1.5"
 animationGraphics = "1.7.8"
 coreKtxVersion = "1.5.0"
+datastore = "1.1.1"
 espressoCoreVersion = "3.5.1"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
@@ -118,6 +119,10 @@ androidx-compose-material-icons-extended = { group = "androidx.compose.material"
 
 # Logging
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+
+# DataStore
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "datastore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

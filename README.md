@@ -20,6 +20,7 @@ Built with cutting-edge Android development practices, this app also showcases t
 - 🔍 **Search** - Find the perfect drink by name or ingredient
 - ❤️ **Favorites** - Save recipes you love for quick access, even offline
 - 📝 **Details** - Get comprehensive instructions, ingredient lists, and beautiful images
+- ⚙️ **Settings** - Customize your experience with theme selection and cache management
 
 ## 🧪 Did You Know?
 
@@ -92,6 +93,12 @@ The application follows the MVVM (Model-View-ViewModel) architecture pattern wit
   - Resolved Hilt duplicate bindings
   - Corrected repository logic for details fetching and favorites
   - Addressed API JSON parsing errors
+- ✅ **Settings Screen**
+  - Created PreferencesManager using DataStore for preferences
+  - Implemented theme selection capabilities
+  - Added cache management options
+  - Created About section with app information
+  - Connected settings to app behavior
 
 ### In Progress
 - 🚧 **API Optimization Enhancements**
@@ -99,14 +106,15 @@ The application follows the MVVM (Model-View-ViewModel) architecture pattern wit
     - Configuring OkHttp cache interceptor with appropriate cache size
     - Implementing cache control headers for GET requests
     - Adding cache invalidation logic for time-sensitive data
+    - Creating mechanism to force refresh data regardless of cache
   - Implementing rate limiting protection
   - Integrating analytics for API call performance
 
 ### Coming Soon
-- 🔮 **Settings Screen**
-  - About section with app information
-  - Theme selection capabilities
-  - Cache management options
+- 🔮 **Performance Optimizations**
+  - Implementing memory caching for frequently accessed data
+  - Optimizing image loading and caching
+  - Enhancing app startup time
 
 ## 🛠️ Tech Stack
 
@@ -118,6 +126,7 @@ The application follows the MVVM (Model-View-ViewModel) architecture pattern wit
 - **Image Loading**: Coil - For fast, efficient image loading
 - **Concurrency**: Kotlin Coroutines + Flow - For smooth, reactive experiences
 - **Offline Support**: WorkManager - For background processing and syncing
+- **Preferences**: DataStore - For storing user preferences
 - **Testing**: JUnit, Mockito, Compose UI Testing - For robust, reliable code
 
 ## 🚀 Getting Started

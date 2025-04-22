@@ -87,12 +87,30 @@
   - [x] Test screen navigation and state preservation (2h)
   - [x] Verify accessibility compliance (2h)
 
-## Phase 5: Improve some features:
+## Phase 5: Settings Screen
+- [x] Implement Settings Screen Foundation
+  - [x] Define Settings screen Composable structure (0.5h)
+  - [x] Create SettingsViewModel (if needed for future state) (0.5h)
+  - [x] Implement basic navigation to Settings screen (from Home/menu) (0.5h)
+- [x] Implement Theme Selection
+  - [x] Design Theme selection UI (e.g., Radio buttons) (0.5h)
+  - [x] Implement ViewModel logic to handle theme state (1h)
+  - [x] Apply selected theme dynamically (1h)
+- [x] Implement Cache Clearing
+  - [x] Design cache clearing UI (e.g., Button, confirmation dialog) (0.5h)
+  - [x] Implement repository/use case method to clear relevant caches (1h)
+  - [x] Connect UI action to cache clearing logic (0.5h)
+- [x] Build 'About' Section
+  - [x] Design 'About' section layout within Settings screen (0.5h)
+  - [x] Implement logic to fetch and display app version name/code (0.5h)
+  - [x] Add basic info text (e.g., developer, data source) (0.5h)
+
+## Phase 6: Improve some features:
 - [ ] Implement API optimization enhancements
   - [ ] Add HTTP caching to reduce API calls (2h)
     - [ ] Configure OkHttp cache interceptor with appropriate cache size (0.5h)
     - [ ] Implement cache control headers for GET requests (0.5h)
-    - [ ] Add cache invalidation logic for time-sensitive data (0.5h)
+    - [ ] Add cache invalidation logic for time-sens6tive data (0.5h)
     - [ ] Create mechanism to force refresh data regardless of cache (0.5h)
   - [ ] Implement rate limiting protection (1h)
     - [ ] Create rate limit interceptor to track API calls (0.5h)
@@ -104,21 +122,3 @@
     - [ ] Implement error rate tracking mechanism (0.5h)
     - [ ] Add reporting system for slow or failed API calls (0.5h)
     - [ ] Create dashboard or logging visualization for performance metrics (1h)
-
-## Phase 6: Settings Screen
-- [ ] Implement Settings Screen Foundation
-  - [ ] Define Settings screen Composable structure (0.5h)
-  - [ ] Create SettingsViewModel (if needed for future state) (0.5h)
-  - [ ] Implement basic navigation to Settings screen (from Home/menu) (0.5h)
-- [ ] Build 'About' Section
-  - [ ] Design 'About' section layout within Settings screen (0.5h)
-  - [ ] Implement logic to fetch and display app version name/code (0.5h)
-  - [ ] Add basic info text (e.g., developer, data source) (0.5h)
-- [ ] (Future) Implement Theme Selection
-  - [ ] Design Theme selection UI (e.g., Radio buttons) (0.5h)
-  - [ ] Implement ViewModel logic to handle theme state (1h)
-  - [ ] Apply selected theme dynamically (1h)
-- [ ] (Future) Implement Cache Clearing
-  - [ ] Design cache clearing UI (e.g., Button, confirmation dialog) (0.5h)
-  - [ ] Implement repository/use case method to clear relevant caches (1h)
-  - [ ] Connect UI action to cache clearing logic (0.5h)

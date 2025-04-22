@@ -1,9 +1,10 @@
 # Active Context
 
 ## Current Focus
-API optimization enhancements - implementing HTTP caching to reduce API calls
+Resolving resource reference issues in Settings screen and preparing for API optimization enhancements
 
 ## Active Tasks
+- Resolve resource reference (R.string) issues in SettingsScreen.kt
 - Implement API optimization enhancements
   - Add HTTP caching to reduce API calls (2h)
     - Configure OkHttp cache interceptor with appropriate cache size (0.5h)
@@ -25,6 +26,7 @@ API optimization enhancements - implementing HTTP caching to reduce API calls
 - Timber for logging ✅
 - Unit Testing Libraries (JUnit, Mockito, Turbine, MockWebServer) ✅
 - Compose UI Testing Framework (ComposeTestRule, UI Automator extensions) ✅
+- DataStore for preferences ✅
 
 ## Implementation Notes
 - The TheCocktailDB API endpoints:
@@ -42,5 +44,9 @@ API optimization enhancements - implementing HTTP caching to reduce API calls
 - UI testing for all main user flows and accessibility compliance is complete ✅
 - Completed implementation of FakeCocktailRepository by adding the isFavorite method ✅
 - UI tests have been simplified to resolve dependency and reference issues ✅
-- Current focus is on implementing API optimization enhancements, starting with HTTP caching
-- The next phase after API optimizations will be implementing the Settings screen
+- Settings screen has been implemented with theme selection, cache clearing, and About section ✅
+- Fixed DataStore edit operations to use MutablePreferences for successful preferences updates ✅
+- Current challenges:
+  - "Unresolved reference: R" in SettingsScreen.kt despite proper import - may require IDE restart or rebuild
+  - Need to ensure stringResource() calls happen within Composable scope, not inside lambdas like semantics{}
+- Next focus after resolving Settings screen issues will be API optimization enhancements

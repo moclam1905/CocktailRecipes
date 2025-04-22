@@ -15,12 +15,14 @@ import com.nguyenmoclam.cocktailrecipes.ui.detail.CocktailDetailScreen
 import com.nguyenmoclam.cocktailrecipes.ui.favorites.FavoritesScreen
 import com.nguyenmoclam.cocktailrecipes.ui.home.HomeScreen
 import com.nguyenmoclam.cocktailrecipes.ui.search.SearchScreen
+import com.nguyenmoclam.cocktailrecipes.ui.settings.SettingsScreen
 
 object NavDestinations {
     const val HOME = "home"
     const val COCKTAIL_DETAIL = "cocktail_detail"
     const val SEARCH = "search"
     const val FAVORITES = "favorites"
+    const val SETTINGS = "settings"
     const val COCKTAIL_ID_ARG = "cocktailId"
 }
 
@@ -74,6 +76,9 @@ fun AppNavigation(
                 },
                 onFavoritesClick = {
                     navController.navigate(NavDestinations.FAVORITES)
+                },
+                onSettingsClick = {
+                    navController.navigate(NavDestinations.SETTINGS)
                 }
             )
         }
@@ -95,6 +100,16 @@ fun AppNavigation(
                 onCocktailClick = { cocktailId ->
                     navController.navigate("${NavDestinations.COCKTAIL_DETAIL}/$cocktailId")
                 },
+                onBackPressed = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        
+        composable(
+            route = NavDestinations.SETTINGS
+        ) {
+            SettingsScreen(
                 onBackPressed = {
                     navController.popBackStack()
                 }

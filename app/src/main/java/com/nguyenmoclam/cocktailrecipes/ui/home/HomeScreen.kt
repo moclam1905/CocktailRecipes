@@ -7,6 +7,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -37,6 +38,7 @@ fun HomeScreen(
     onCocktailClick: (String) -> Unit,
     onSearchClick: () -> Unit,
     onFavoritesClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -58,7 +60,7 @@ fun HomeScreen(
                 CenterAlignedTopAppBar(
                     title = { 
                         Text(
-                            text = "Cocktail Recipes",
+                            text = stringResource(R.string.home_title),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -67,13 +69,19 @@ fun HomeScreen(
                         IconButton(onClick = onSearchClick) {
                             Icon(
                                 imageVector = Icons.Default.Search,
-                                contentDescription = "Search"
+                                contentDescription = stringResource(R.string.search)
                             )
                         }
                         IconButton(onClick = onFavoritesClick) {
                             Icon(
                                 imageVector = Icons.Default.Favorite,
-                                contentDescription = "Favorites"
+                                contentDescription = stringResource(R.string.favorites)
+                            )
+                        }
+                        IconButton(onClick = onSettingsClick) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = stringResource(R.string.settings)
                             )
                         }
                     }
@@ -96,7 +104,7 @@ fun HomeScreen(
                     // Show error state
                     uiState.error != null && uiState.cocktails.isEmpty() -> {
                         ErrorView(
-                            message = uiState.error ?: "Unknown error occurred",
+                            message = uiState.error ?: stringResource(R.string.unknown_error),
                             onRetry = { viewModel.handleEvent(HomeEvent.LoadCocktails) },
                             modifier = Modifier.fillMaxSize()
                         )
@@ -105,8 +113,8 @@ fun HomeScreen(
                     // Show empty state
                     uiState.cocktails.isEmpty() -> {
                         EmptyStateView(
-                            title = "No Cocktails Found",
-                            message = "Try refreshing to see popular cocktails",
+                            title = stringResource(R.string.no_cocktails_found),
+                            message = stringResource(R.string.try_refreshing),
                             modifier = Modifier.fillMaxSize()
                         )
                     }
@@ -153,7 +161,8 @@ fun HomeScreenPreview() {
         HomeScreen(
             onCocktailClick = {},
             onSearchClick = {},
-            onFavoritesClick = {}
+            onFavoritesClick = {},
+            onSettingsClick = {}
         )
     }
 }

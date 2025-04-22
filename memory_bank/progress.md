@@ -79,8 +79,19 @@
   - Implemented FavoritesScreen tests for adding/removing favorites
   - Created accessibility tests to verify content descriptions and screen reader support
   - Simplified UI tests to resolve dependency and reference issues
+- **Implemented Settings screen:**
+  - Created PreferencesManager using DataStore for preferences
+  - Implemented SettingsRepository and SettingsRepositoryImpl
+  - Designed and implemented SettingsScreen UI with theme selection
+  - Added cache clearing functionality with confirmation dialog
+  - Created About section with app version and information
+  - Added unit tests for SettingsViewModel
+  - Updated MainActivity to respect theme preference
+  - Fixed DataStore edit operations with MutablePreferences
+  - Added string resources for all UI text
 
 ## In Progress
+- Resolving resource reference issues (R.string) in SettingsScreen.kt
 - API optimization enhancements 
   - Adding HTTP caching to reduce API calls
 
@@ -89,4 +100,3 @@
 
 ## Next Up
 - Complete API optimization enhancements (HTTP caching, rate limiting protection, analytics)
-- Implement Settings screen

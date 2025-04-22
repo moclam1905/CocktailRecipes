@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.work.WorkManager
+import com.nguyenmoclam.cocktailrecipes.data.local.PreferencesManager
 import com.nguyenmoclam.cocktailrecipes.data.network.NetworkMonitor
 import com.nguyenmoclam.cocktailrecipes.data.worker.CocktailSyncWorker
 import com.nguyenmoclam.cocktailrecipes.ui.components.OfflineIndicator
@@ -35,12 +36,20 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var workManager: WorkManager
     
+    @Inject
+    lateinit var preferencesManager: PreferencesManager
+    
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            CocktailRecipesTheme {
+            // Collect theme mode preference from DataStore
+            val themeMode by preferencesManager.themeMode.collectAsState(initial = PreferencesManager.THEME_MODE_SYSTEM)
+            
+            CocktailRecipesTheme(
+                themeMode = themeMode
+            ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
