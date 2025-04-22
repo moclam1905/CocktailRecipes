@@ -8,10 +8,12 @@ import com.nguyenmoclam.cocktailrecipes.data.local.PreferencesManager
 import com.nguyenmoclam.cocktailrecipes.domain.repository.CocktailRepository
 import com.nguyenmoclam.cocktailrecipes.domain.repository.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -40,9 +42,12 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun clearAppCache(): Boolean {
         return try {
             // Clear database cache but keep favorites
-            appDatabase.clearAllTables()
-            // Mark cache as cleared in preferences
-            preferencesManager.setCacheCleared(true)
+            // Switch to IO dispatcher to avoid running database operations on main thread
+            withContext(Dispatchers.IO) {
+                appDatabase.clearAllTables()
+                // Mark cache as cleared in preferences
+                preferencesManager.setCacheCleared(true)
+            }
             Timber.d("App cache cleared successfully")
             true
         } catch (e: Exception) {
@@ -54,7 +59,9 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun clearApiCache(): Boolean {
         return try {
             // Invalidate all API caches to force refresh on next fetch
-            val result = cocktailRepository.invalidateAllCaches().first()
+            val result = withContext(Dispatchers.IO) {
+                cocktailRepository.invalidateAllCaches().first()
+            }
             val success = if (result is Resource.Success) {
                 result.data == true
             } else {

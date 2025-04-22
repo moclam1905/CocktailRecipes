@@ -27,6 +27,15 @@
     <string name="cancel">Cancel</string>
     <string name="cache_cleared">Cache cleared successfully</string>
     
+    <!-- API Performance Dashboard -->
+    <string name="api_performance_title">API Performance</string>
+    <string name="api_performance_description">View analytics and metrics for API calls</string>
+    <string name="view_dashboard">View</string>
+    <string name="dashboard_title">API Performance Dashboard</string>
+    <string name="generate_report">Generate Report</string>
+    <string name="reset_analytics">Reset Analytics</string>
+    <string name="close">Close</string>
+    
     <!-- About Section -->
     <string name="about_title">About</string>
     <string name="about_version">Version: %1$s</string>

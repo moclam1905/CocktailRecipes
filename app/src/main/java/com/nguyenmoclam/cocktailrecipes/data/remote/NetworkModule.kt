@@ -2,6 +2,8 @@ package com.nguyenmoclam.cocktailrecipes.data.remote
 
 import android.content.Context
 import com.nguyenmoclam.cocktailrecipes.data.common.DrinksListAdapter
+import com.nguyenmoclam.cocktailrecipes.data.remote.interceptor.PerformanceTrackingInterceptor
+import com.nguyenmoclam.cocktailrecipes.data.remote.interceptor.RateLimitInterceptor
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -57,7 +59,11 @@ object NetworkModule {
      */
     @Provides
     @Singleton
-    fun provideOkHttpClient(cache: Cache): OkHttpClient {
+    fun provideOkHttpClient(
+        cache: Cache,
+        rateLimitInterceptor: RateLimitInterceptor,
+        performanceInterceptor: PerformanceTrackingInterceptor
+    ): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY // Use NONE in production
         }
@@ -91,7 +97,10 @@ object NetworkModule {
                     response
                 }
             }
+            // Add performance tracking first to measure complete call time including other interceptors
+            .addInterceptor(performanceInterceptor)
             .addInterceptor(loggingInterceptor)
+            .addInterceptor(rateLimitInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)

@@ -11,6 +11,7 @@ import androidx.navigation.navArgument
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.nguyenmoclam.cocktailrecipes.ui.analytics.ApiPerformanceDashboard
 import com.nguyenmoclam.cocktailrecipes.ui.detail.CocktailDetailScreen
 import com.nguyenmoclam.cocktailrecipes.ui.favorites.FavoritesScreen
 import com.nguyenmoclam.cocktailrecipes.ui.home.HomeScreen
@@ -23,6 +24,7 @@ object NavDestinations {
     const val SEARCH = "search"
     const val FAVORITES = "favorites"
     const val SETTINGS = "settings"
+    const val API_DASHBOARD = "api_dashboard"
     const val COCKTAIL_ID_ARG = "cocktailId"
 }
 
@@ -111,6 +113,20 @@ fun AppNavigation(
         ) {
             SettingsScreen(
                 onBackPressed = {
+                    navController.popBackStack()
+                },
+                onOpenApiDashboard = {
+                    navController.navigate(NavDestinations.API_DASHBOARD)
+                }
+            )
+        }
+        
+        composable(
+            route = NavDestinations.API_DASHBOARD
+        ) {
+            ApiPerformanceDashboard(
+                onGenerateReport = { /* Handle report generation */ },
+                onDismiss = {
                     navController.popBackStack()
                 }
             )

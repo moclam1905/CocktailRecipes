@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.nguyenmoclam.cocktailrecipes.data.local.PreferencesManager
 import com.nguyenmoclam.cocktailrecipes.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -71,7 +72,16 @@ open class SettingsViewModel @Inject constructor(
 
     fun clearCache() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isCacheClearing = true, isApiCacheClearing = true, showClearCacheConfirmation = false) }
+            _uiState.update { 
+                it.copy(
+                    isCacheClearing = true,
+                    isApiCacheClearing = true,
+                    showClearCacheConfirmation = false,
+                    // Reset previously cleared status if trying to clear again
+                    cacheCleared = false,
+                    apiCacheCleared = false
+                )
+            }
             
             // Clear app database cache
             val appCacheSuccess = settingsRepository.clearAppCache()
@@ -79,6 +89,7 @@ open class SettingsViewModel @Inject constructor(
             // Clear API HTTP cache
             val apiCacheSuccess = settingsRepository.clearApiCache()
             
+            // Update with success results
             _uiState.update { 
                 it.copy(
                     isCacheClearing = false, 
@@ -86,6 +97,17 @@ open class SettingsViewModel @Inject constructor(
                     cacheCleared = appCacheSuccess,
                     apiCacheCleared = apiCacheSuccess
                 ) 
+            }
+            
+            // Reset the cache cleared flags after 3 seconds
+            // This ensures the snackbar is displayed and then the flag is reset
+            // so it can be triggered again on the next clear
+            delay(3000)
+            _uiState.update {
+                it.copy(
+                    cacheCleared = false,
+                    apiCacheCleared = false
+                )
             }
         }
     }

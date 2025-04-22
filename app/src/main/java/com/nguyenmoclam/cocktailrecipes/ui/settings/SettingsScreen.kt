@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.BrightnessAuto
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -63,6 +64,7 @@ import kotlinx.coroutines.flow.flowOf
 @Composable
 fun SettingsScreen(
     onBackPressed: () -> Unit,
+    onOpenApiDashboard: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -127,6 +129,13 @@ fun SettingsScreen(
                 onClearCache = viewModel::showClearCacheConfirmation
             )
 
+            Divider()
+            
+            // API Performance Dashboard
+            ApiPerformanceSection(
+                onOpenDashboard = onOpenApiDashboard
+            )
+            
             Divider()
 
             // About Section
@@ -299,6 +308,54 @@ fun CacheClearingSection(
                     // stringResource is okay here as it's directly in Button's content
                     Text(stringResource(R.string.clear_button))
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun ApiPerformanceSection(
+    onOpenDashboard: () -> Unit
+) {
+    val apiPerformanceContentDesc = stringResource(R.string.view_dashboard)
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Speed,
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 16.dp)
+                )
+                Column {
+                    Text(
+                        text = stringResource(R.string.api_performance_title),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = stringResource(R.string.api_performance_description),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            
+            Button(
+                onClick = onOpenDashboard,
+                modifier = Modifier.semantics {
+                    contentDescription = apiPerformanceContentDesc
+                }
+            ) {
+                Text(stringResource(R.string.view_dashboard))
             }
         }
     }

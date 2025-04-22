@@ -21,6 +21,7 @@ Built with cutting-edge Android development practices, this app also showcases t
 - ❤️ **Favorites** - Save recipes you love for quick access, even offline
 - 📝 **Details** - Get comprehensive instructions, ingredient lists, and beautiful images
 - ⚙️ **Settings** - Customize your experience with theme selection and cache management
+- 📊 **Analytics** - View API performance metrics and optimize app experience
 
 ## 🧪 Did You Know?
 
@@ -93,6 +94,7 @@ The application follows the MVVM (Model-View-ViewModel) architecture pattern wit
   - Resolved Hilt duplicate bindings
   - Corrected repository logic for details fetching and favorites
   - Addressed API JSON parsing errors
+  - Fixed database operations to run on background threads, preventing UI freezes
 - ✅ **Settings Screen**
   - Created PreferencesManager using DataStore for preferences
   - Implemented theme selection capabilities
@@ -105,6 +107,12 @@ The application follows the MVVM (Model-View-ViewModel) architecture pattern wit
     - Implemented cache control headers for GET requests
     - Added cache invalidation logic for time-sensitive data
     - Created mechanism to force refresh data regardless of cache
+  - Added analytics for API call performance
+    - Created performance tracking interceptor to log call durations
+    - Implemented error rate tracking mechanism
+    - Added reporting system for slow or failed API calls
+    - Created API performance dashboard with metrics visualization
+    - Fixed dependency cycle between analytics components using Dagger Provider
 
 ### In Progress
 - 🚧 **API Optimization Enhancements (continuing)**
@@ -112,9 +120,7 @@ The application follows the MVVM (Model-View-ViewModel) architecture pattern wit
     - Creating rate limit interceptor to track API calls
     - Implementing exponential backoff for rate limit responses
     - Adding user-facing feedback when rate limits are reached
-  - Integrating analytics for API call performance
-    - Creating performance tracking interceptor
-    - Implementing error rate tracking and reporting
+    - Storing and respecting rate limit headers from API responses
 
 ### Coming Soon
 - 🔮 **New Features**
