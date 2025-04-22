@@ -100,3 +100,16 @@
 
 ## Next Up
 - Complete API optimization enhancements (HTTP caching, rate limiting protection, analytics)
+- Begin implementation of new free API features:
+  - "Surprise Me!" Random Cocktail Feature
+    - Implement random.php API endpoint integration
+    - Create surprise animation and UI
+  - Ingredient Explorer Feature
+    - Develop ingredient listing and details screens
+    - Integrate list.php?i=list and ingredient images
+  - Advanced Filtering Options
+    - Add category, glass type, and alcoholic/non-alcoholic filters
+  - "Mocktail Corner" Feature
+    - Create dedicated section for non-alcoholic drinks
+  - "Browse by First Letter" Feature
+    - Implement alphabetical browsing interface

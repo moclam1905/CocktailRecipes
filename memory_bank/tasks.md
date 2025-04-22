@@ -122,3 +122,47 @@
     - [ ] Implement error rate tracking mechanism (0.5h)
     - [ ] Add reporting system for slow or failed API calls (0.5h)
     - [ ] Create dashboard or logging visualization for performance metrics (1h)
+
+## Phase 7: New Free-API Features
+- [ ] Implement "Surprise Me!" Random Cocktail Feature
+  - [ ] Create a "Surprise Me" button on Home screen (1h)
+  - [ ] Implement Random Cocktail API integration using random.php endpoint (1h)
+  - [ ] UI/UX: Implement Shake-to-Activate gesture (1h)
+  - [ ] UI/UX: Add 3D Card Flip animation for result reveal (1.5h)
+  - [ ] UI/UX: Add loading animation (pouring cocktail) (1h)
+  - [ ] Implement navigation to cocktail details on selection (0.5h)
+- [ ] Develop Ingredient Explorer Feature
+  - [ ] Create Ingredient Explorer screen foundation (1h)
+  - [ ] Implement API call to fetch all ingredients using list.php?i=list (1h)
+  - [ ] UI/UX: Design ingredient list with Hexagon Grid layout (1.5h)
+  - [ ] Add ingredient image loading using TheCocktailDB's ingredient images (1h)
+  - [ ] Create ingredient detail view with related cocktails (2h)
+  - [ ] UI/UX: Implement zoom/explode effect when selecting ingredient (1h)
+  - [ ] Implement navigation between ingredients and their cocktails (1h)
+  - [ ] UI/UX Refinement: Explore mind-map visualization for ingredient relationships (2h)
+- [ ] Add Advanced Filtering Options
+  - [ ] Create filter screen/panel foundation (1h)
+  - [ ] Implement Category filtering using list.php?c=list and filter.php?c= (1h)
+  - [ ] Add Glass type filtering using list.php?g=list and filter.php?g= (1h)
+  - [ ] Implement Alcoholic/Non-Alcoholic filtering using filter.php?a= (1h)
+  - [ ] UI/UX: Design filter UI ("mixology lab" theme) (2h)
+  - [ ] UI/UX: Implement interactive filter elements (drag & drop/sliders) (2.5h)
+  - [ ] Create filter combination logic for complex searches (2h)
+- [ ] Create "Mocktail Corner" Feature
+  - [ ] Add dedicated section/tab for non-alcoholic drinks (1h)
+  - [ ] Implement API integration with filter.php?a=Non_Alcoholic (1h)
+  - [ ] UI/UX: Design "garden-inspired" UI theme for Mocktail section (2h)
+  - [ ] UI/UX: Add special visual effects (water/fruit animations) (1.5h)
+  - [ ] Add promotional content highlighting benefits of alcohol-free options (1h)
+  - [ ] UI/UX Refinement: Implement wave-style scroll animation (1h)
+- [ ] Implement "Browse by First Letter" Feature
+  - [ ] Create alphabetical browsing screen foundation (1h)
+  - [ ] Implement API integration with search.php?f= endpoint (1h)
+  - [ ] UI/UX: Design letter selection UI (Rotary wheel or 3D carousel) (2h)
+  - [ ] UI/UX: Add "pouring results" animation when letter is selected (1h)
+  - [ ] Add lazy loading for letter-based results (1h)
+  - [ ] Design intuitive navigation for alphabetical browsing (1h)
+- [ ] General UI/UX Refinements for Phase 7
+  - [ ] Explore neumorphism design style for key components (2h)
+  - [ ] Implement subtle haptic feedback for interactions (1h)
+  - [ ] Consider bottom navigation bar design (bar theme) (1.5h)
