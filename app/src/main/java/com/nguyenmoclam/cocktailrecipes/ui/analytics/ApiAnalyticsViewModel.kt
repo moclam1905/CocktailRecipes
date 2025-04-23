@@ -1,19 +1,38 @@
 package com.nguyenmoclam.cocktailrecipes.ui.analytics
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nguyenmoclam.cocktailrecipes.data.remote.analytics.ApiAnalyticsManager
 import com.nguyenmoclam.cocktailrecipes.data.remote.interceptor.PerformanceTrackingInterceptor
+import com.nguyenmoclam.cocktailrecipes.ui.analytics.ApiAnalyticsViewModel.ErrorDetails
+import com.nguyenmoclam.cocktailrecipes.ui.analytics.ApiAnalyticsViewModel.SlowCallDetails
+import com.nguyenmoclam.cocktailrecipes.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
+
+/**
+ * UI state for the API analytics dashboard
+ */
+data class ApiAnalyticsUiState(
+    val endpointMetrics: Map<String, PerformanceTrackingInterceptor.EndpointMetrics> = emptyMap(),
+    val recentErrors: List<ErrorDetails> = emptyList(),
+    val recentSlowCalls: List<SlowCallDetails> = emptyList(),
+    val lastUpdated: String = "",
+    val lastReportPath: String = ""
+)
+
+/**
+ * Events for the API analytics dashboard
+ */
+sealed class ApiAnalyticsEvent {
+    object RefreshData : ApiAnalyticsEvent()
+    object GenerateReport : ApiAnalyticsEvent()
+    object ResetAnalytics : ApiAnalyticsEvent()
+}
 
 /**
  * ViewModel for the API analytics dashboard
@@ -22,15 +41,11 @@ import javax.inject.Inject
 class ApiAnalyticsViewModel @Inject constructor(
     private val analyticsManager: ApiAnalyticsManager,
     private val performanceInterceptor: PerformanceTrackingInterceptor
-) : ViewModel() {
-
-    // UI state for the dashboard
-    private val _uiState = MutableStateFlow(ApiAnalyticsUiState())
-    val uiState: StateFlow<ApiAnalyticsUiState> = _uiState.asStateFlow()
+) : BaseViewModel<ApiAnalyticsUiState, ApiAnalyticsEvent>(ApiAnalyticsUiState()) {
 
     init {
         // Load initial data
-        refreshData()
+        handleEvent(ApiAnalyticsEvent.RefreshData)
 
         // Observe error rates
         viewModelScope.launch {
@@ -40,63 +55,54 @@ class ApiAnalyticsViewModel @Inject constructor(
         }
     }
 
+    override suspend fun processEvent(event: ApiAnalyticsEvent) {
+        when (event) {
+            is ApiAnalyticsEvent.RefreshData -> refreshData()
+            is ApiAnalyticsEvent.GenerateReport -> generateReport()
+            is ApiAnalyticsEvent.ResetAnalytics -> resetAnalytics()
+        }
+    }
+
     /**
      * Refresh analytics data
      */
-    fun refreshData() {
-        viewModelScope.launch {
-            // Get current metrics from the performance interceptor
-            val metrics = performanceInterceptor.getPerformanceMetrics()
+    private suspend fun refreshData() {
+        // Get current metrics from the performance interceptor
+        val metrics = performanceInterceptor.getPerformanceMetrics()
 
-            // Convert errors and slow calls to display format
-            val errorEvents = mutableListOf<ErrorDetails>()
-            val slowCallEvents = mutableListOf<SlowCallDetails>()
+        // Convert errors and slow calls to display format
+        val errorEvents = mutableListOf<ErrorDetails>()
+        val slowCallEvents = mutableListOf<SlowCallDetails>()
 
-            // In a real app, you would fetch these from the analytics manager
-            // For now, we'll just use sample data until we integrate with the manager
+        // In a real app, you would fetch these from the analytics manager
+        // For now, we'll just use sample data until we integrate with the manager
 
-            // Update UI state
-            _uiState.update { currentState ->
-                currentState.copy(
-                    endpointMetrics = metrics,
-                    recentErrors = errorEvents,
-                    recentSlowCalls = slowCallEvents,
-                    lastUpdated = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date())
-                )
-            }
+        // Update UI state
+        updateState { currentState ->
+            currentState.copy(
+                endpointMetrics = metrics,
+                recentErrors = errorEvents,
+                recentSlowCalls = slowCallEvents,
+                lastUpdated = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date())
+            )
         }
     }
 
     /**
      * Generate a performance report
      */
-    fun generateReport() {
-        viewModelScope.launch {
-            val reportPath = analyticsManager.generatePerformanceReport()
-            _uiState.update { it.copy(lastReportPath = reportPath) }
-        }
+    private suspend fun generateReport() {
+        val reportPath = analyticsManager.generatePerformanceReport()
+        updateState { it.copy(lastReportPath = reportPath) }
     }
 
     /**
      * Reset analytics data
      */
-    fun resetAnalytics() {
-        viewModelScope.launch {
-            analyticsManager.resetAnalytics()
-            refreshData()
-        }
+    private suspend fun resetAnalytics() {
+        analyticsManager.resetAnalytics()
+        refreshData()
     }
-
-    /**
-     * UI state for the API analytics dashboard
-     */
-    data class ApiAnalyticsUiState(
-        val endpointMetrics: Map<String, PerformanceTrackingInterceptor.EndpointMetrics> = emptyMap(),
-        val recentErrors: List<ErrorDetails> = emptyList(),
-        val recentSlowCalls: List<SlowCallDetails> = emptyList(),
-        val lastUpdated: String = "",
-        val lastReportPath: String = ""
-    )
 
     /**
      * Error details for display

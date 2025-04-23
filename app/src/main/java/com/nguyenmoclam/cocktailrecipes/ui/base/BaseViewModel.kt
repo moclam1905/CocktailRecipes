@@ -15,7 +15,7 @@ abstract class BaseViewModel<UiState, UiEvent>(initialState: UiState) : ViewMode
 
     // UI state as StateFlow
     private val _uiState = MutableStateFlow(initialState)
-    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+    open val uiState: StateFlow<UiState> = _uiState.asStateFlow()
     
     // Rate limit error flow
     private val _rateLimitError = MutableStateFlow<Throwable?>(null)

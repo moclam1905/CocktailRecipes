@@ -49,8 +49,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nguyenmoclam.cocktailrecipes.R
-import com.nguyenmoclam.cocktailrecipes.ui.analytics.ApiAnalyticsViewModel
 import com.nguyenmoclam.cocktailrecipes.data.remote.interceptor.PerformanceTrackingInterceptor
+import com.nguyenmoclam.cocktailrecipes.ui.analytics.ApiAnalyticsViewModel.ErrorDetails
+import com.nguyenmoclam.cocktailrecipes.ui.analytics.ApiAnalyticsViewModel.SlowCallDetails
 import com.nguyenmoclam.cocktailrecipes.ui.theme.CocktailRecipesTheme
 import kotlinx.coroutines.launch
 
@@ -119,6 +120,21 @@ fun ApiPerformanceDashboard(
                 }
             }
             
+            // Refresh button
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = {
+                    scope.launch {
+                        viewModel.handleEvent(ApiAnalyticsEvent.RefreshData)
+                        snackbarHostState.showSnackbar("Dashboard data refreshed")
+                    }
+                }) {
+                    Text("Refresh Data")
+                }
+            }
+            
             // Dashboard summary
             SummaryCard(
                 totalCalls = uiState.endpointMetrics.values.sumOf { it.totalCalls },
@@ -139,10 +155,10 @@ fun ApiPerformanceDashboard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Button(onClick = {
-                    viewModel.generateReport()
-                    onGenerateReport()
-                    // Show a toast or snackbar to inform the user
                     scope.launch {
+                        viewModel.handleEvent(ApiAnalyticsEvent.GenerateReport)
+                        onGenerateReport()
+                        // Show a toast or snackbar to inform the user
                         snackbarHostState.showSnackbar(
                             message = "Report generated at: ${uiState.lastReportPath}"
                         )
@@ -152,8 +168,8 @@ fun ApiPerformanceDashboard(
                 }
                 
                 Button(onClick = {
-                    viewModel.resetAnalytics()
                     scope.launch {
+                        viewModel.handleEvent(ApiAnalyticsEvent.ResetAnalytics)
                         snackbarHostState.showSnackbar(
                             message = "Analytics data has been reset"
                         )
@@ -377,7 +393,7 @@ private fun PerformanceTab(
 
 @Composable
 private fun ErrorsTab(
-    errors: List<ApiAnalyticsViewModel.ErrorDetails>
+    errors: List<ErrorDetails>
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -456,7 +472,7 @@ private fun ErrorsTab(
 
 @Composable
 private fun SlowCallsTab(
-    slowCalls: List<ApiAnalyticsViewModel.SlowCallDetails>
+    slowCalls: List<SlowCallDetails>
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()

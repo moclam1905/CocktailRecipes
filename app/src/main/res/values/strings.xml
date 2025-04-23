@@ -41,4 +41,12 @@
     <string name="about_version">Version: %1$s</string>
     <string name="about_description">A modern cocktail recipe app built with Jetpack Compose.</string>
     <string name="about_data_source">Data provided by TheCocktailDB API</string>
+    
+    <!-- Mocktail Corner -->
+    <string name="mocktail_corner_title">Mocktail Corner</string>
+    <string name="mocktail_description">Discover delicious non-alcoholic alternatives</string>
+    <string name="mocktail_benefits_title">Benefits of Mocktails</string>
+    <string name="mocktail_benefits_description">Enjoy the taste without the alcohol. Perfect for designated drivers, pregnant women, and those who prefer not to consume alcohol.</string>
+    <string name="no_mocktails_found">No Mocktails Found</string>
+    <string name="try_refreshing_mocktails">Try refreshing to see non-alcoholic drinks</string>
 </resources>

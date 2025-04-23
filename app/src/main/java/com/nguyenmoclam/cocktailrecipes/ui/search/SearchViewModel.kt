@@ -119,7 +119,7 @@ class SearchViewModel @Inject constructor(
                     is Resource.Error -> {
                         // Check for rate limit errors
                         resource.apiError.throwable?.let { handleApiError(it) }
-                        SearchUIState.Error(resource.apiError.message ?: "Unknown error during search")
+                        SearchUIState.Error(resource.apiError.message)
                     }
                 }
             }

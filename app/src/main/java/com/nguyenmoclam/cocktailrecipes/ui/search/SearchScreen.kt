@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Info
@@ -43,12 +44,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.nguyenmoclam.cocktailrecipes.R
 import com.nguyenmoclam.cocktailrecipes.ui.base.BaseScreen
 import com.nguyenmoclam.cocktailrecipes.ui.components.CocktailListItem
 import com.nguyenmoclam.cocktailrecipes.ui.components.CocktailListLoadingPlaceholder
@@ -59,6 +62,7 @@ import com.nguyenmoclam.cocktailrecipes.ui.components.SearchBar
 fun SearchScreen(
     onCocktailClick: (String) -> Unit,
     onFilterClick: () -> Unit,
+    onBackPressed: () -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -82,11 +86,11 @@ fun SearchScreen(
                         overflow = TextOverflow.Ellipsis
                     )
                 },
-                actions = {
-                    IconButton(onClick = onFilterClick) {
+                navigationIcon = {
+                    IconButton(onClick = onBackPressed) {
                         Icon(
-                            imageVector = Icons.Default.FilterAlt,
-                            contentDescription = "Advanced Filters"
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
                 }

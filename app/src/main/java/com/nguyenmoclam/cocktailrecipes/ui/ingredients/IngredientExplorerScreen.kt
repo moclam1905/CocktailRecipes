@@ -81,6 +81,7 @@ fun IngredientExplorerScreen(
     viewModel: IngredientExplorerViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val scope = rememberCoroutineScope()
     
     Scaffold(
         topBar = {
@@ -100,12 +101,20 @@ fun IngredientExplorerScreen(
                 },
                 actions = {
                     if (uiState.selectedIngredient != null) {
-                        IconButton(onClick = { viewModel.clearSelectedIngredient() }) {
+                        IconButton(onClick = { 
+                            scope.launch {
+                                viewModel.handleEvent(IngredientExplorerEvent.ClearSelectedIngredient)
+                            }
+                        }) {
                             Icon(Icons.Default.Close, contentDescription = "Clear selection")
                         }
                     }
                     
-                    IconButton(onClick = { viewModel.loadIngredients(true) }) {
+                    IconButton(onClick = { 
+                        scope.launch {
+                            viewModel.handleEvent(IngredientExplorerEvent.LoadIngredients(true))
+                        }
+                    }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Refresh")
                     }
                 },
@@ -118,7 +127,11 @@ fun IngredientExplorerScreen(
         floatingActionButton = {
             if (uiState.selectedIngredient != null) {
                 FloatingActionButton(
-                    onClick = { viewModel.clearSelectedIngredient() },
+                    onClick = { 
+                        scope.launch {
+                            viewModel.handleEvent(IngredientExplorerEvent.ClearSelectedIngredient)
+                        }
+                    },
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     Icon(
@@ -141,7 +154,11 @@ fun IngredientExplorerScreen(
                 uiState.error != null -> {
                     ErrorView(
                         message = uiState.error ?: "Unknown error occurred",
-                        onRetry = { viewModel.loadIngredients(true) },
+                        onRetry = { 
+                            scope.launch {
+                                viewModel.handleEvent(IngredientExplorerEvent.LoadIngredients(true))
+                            }
+                        },
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -154,7 +171,11 @@ fun IngredientExplorerScreen(
                 else -> {
                     IngredientExplorerContent(
                         uiState = uiState,
-                        onIngredientClick = { viewModel.selectIngredient(it) },
+                        onIngredientClick = { ingredient ->
+                            scope.launch {
+                                viewModel.handleEvent(IngredientExplorerEvent.SelectIngredient(ingredient))
+                            }
+                        },
                         onCocktailClick = onCocktailClick
                     )
                 }

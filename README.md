@@ -25,6 +25,7 @@ Built with cutting-edge Android development practices, this app also showcases t
 - 🎲 **Surprise Me!** - Shake your device to discover random cocktails with beautiful animations
 - 🧪 **Filter Lab** - Apply multiple filters like category, glass type, and alcohol content
 - 🌿 **Ingredient Explorer** - Browse ingredients in an interactive hexagon grid and discover related cocktails
+- 🥤 **Mocktail Corner** - Explore a garden-inspired section dedicated to alcohol-free drinks
 
 ## 🧪 Did You Know?
 
@@ -48,6 +49,7 @@ The application follows the MVVM (Model-View-ViewModel) architecture pattern wit
 - **Data Layer**: API integration and local database for offline access
 - **Domain Layer**: Business logic and use cases to keep your drinks perfect
 - **UI Layer**: Beautiful Jetpack Compose UI components and responsive ViewModels
+- **BaseViewModel Pattern**: All ViewModels inherit from a common base class for standardized state management and error handling
 
 ## 🚀 Current Progress
 
@@ -140,6 +142,24 @@ The application follows the MVVM (Model-View-ViewModel) architecture pattern wit
   - Created filter preferences persistence using DataStore
   - Implemented filter combination logic for complex searches
   - Optimized performance with parallel API loading
+- ✅ **Architectural Improvements**
+  - Standardized all ViewModels to use BaseViewModel pattern
+  - Implemented consistent event-based approach with handleEvent method
+  - Created unified error handling system across the application
+  - Updated all UI screens to use proper coroutine scope for suspend functions
+  - Added consistent user feedback for API errors
+- ✅ **"Mocktail Corner" Feature**
+  - Added dedicated section for non-alcoholic drinks
+  - Designed "garden-inspired" UI theme with animations
+  - Implemented special visual effects (water/fruit animations)
+  - Added promotional content highlighting benefits of alcohol-free options
+  - Created wave-style scroll animation
+  - Implemented toggle for animations (accessibility feature)
+  - Added support for landscape mode
+  - Optimized dark mode appearance
+  - Added in-memory caching for better performance
+  - Created unit tests for MocktailViewModel
+  - Added UI tests for MocktailCornerScreen
 
 ### In Progress
 - 🚧 **"Mocktail Corner" Feature**
@@ -172,7 +192,7 @@ The application follows the MVVM (Model-View-ViewModel) architecture pattern wit
 - **Concurrency**: Kotlin Coroutines + Flow - For smooth, reactive experiences
 - **Offline Support**: WorkManager - For background processing and syncing
 - **Preferences**: DataStore - For storing user preferences
-- **Testing**: JUnit, Mockito, Compose UI Testing - For robust, reliable code
+- **Testing**: JUnit, Mockito, Turbine, Compose UI Testing - For robust, reliable code
 
 ## 🚀 Getting Started
 

@@ -1,115 +1,14 @@
 package com.nguyenmoclam.cocktailrecipes.ui.ingredients
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nguyenmoclam.cocktailrecipes.data.common.ApiError
 import com.nguyenmoclam.cocktailrecipes.data.common.Resource
 import com.nguyenmoclam.cocktailrecipes.domain.model.Cocktail
 import com.nguyenmoclam.cocktailrecipes.domain.model.IngredientItem
 import com.nguyenmoclam.cocktailrecipes.domain.repository.CocktailRepository
+import com.nguyenmoclam.cocktailrecipes.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-/**
- * ViewModel for Ingredient Explorer feature
- */
-@HiltViewModel
-class IngredientExplorerViewModel @Inject constructor(
-    private val repository: CocktailRepository
-) : ViewModel() {
-    
-    private val _uiState = MutableStateFlow(IngredientExplorerUiState())
-    val uiState: StateFlow<IngredientExplorerUiState> = _uiState.asStateFlow()
-    
-    init {
-        loadIngredients()
-    }
-    
-    /**
-     * Load all available ingredients
-     */
-    fun loadIngredients(forceRefresh: Boolean = false) {
-        _uiState.update { it.copy(
-            isLoading = true, 
-            error = null,
-            selectedIngredient = null,
-            cocktails = emptyList()
-        )}
-        
-        viewModelScope.launch {
-            repository.getAllIngredients(forceRefresh).collect { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        _uiState.update { it.copy(
-                            isLoading = false,
-                            ingredients = result.data,
-                            error = null
-                        )}
-                    }
-                    is Resource.Error -> {
-                        _uiState.update { it.copy(
-                            isLoading = false,
-                            error = result.apiError.message
-                        )}
-                    }
-                    is Resource.Loading -> {
-                        _uiState.update { it.copy(isLoading = true) }
-                    }
-                }
-            }
-        }
-    }
-    
-    /**
-     * Select an ingredient and load related cocktails
-     */
-    fun selectIngredient(ingredient: IngredientItem) {
-        _uiState.update { it.copy(
-            isLoading = true,
-            selectedIngredient = ingredient,
-            cocktails = emptyList(),
-            error = null
-        )}
-        
-        viewModelScope.launch {
-            repository.getCocktailsByIngredient(ingredient.name).collect { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        _uiState.update { it.copy(
-                            isLoading = false,
-                            cocktails = result.data,
-                            error = null
-                        )}
-                    }
-                    is Resource.Error -> {
-                        _uiState.update { it.copy(
-                            isLoading = false,
-                            error = result.apiError.message
-                        )}
-                    }
-                    is Resource.Loading -> {
-                        _uiState.update { it.copy(isLoading = true) }
-                    }
-                }
-            }
-        }
-    }
-    
-    /**
-     * Clear selected ingredient
-     */
-    fun clearSelectedIngredient() {
-        _uiState.update { it.copy(
-            selectedIngredient = null,
-            cocktails = emptyList()
-        )}
-    }
-}
 
 /**
  * UI state for the Ingredient Explorer screen
@@ -120,4 +19,116 @@ data class IngredientExplorerUiState(
     val selectedIngredient: IngredientItem? = null,
     val cocktails: List<Cocktail> = emptyList(),
     val error: String? = null
-) 
+)
+
+/**
+ * Events for the Ingredient Explorer screen
+ */
+sealed class IngredientExplorerEvent {
+    data class LoadIngredients(val forceRefresh: Boolean = false) : IngredientExplorerEvent()
+    data class SelectIngredient(val ingredient: IngredientItem) : IngredientExplorerEvent()
+    object ClearSelectedIngredient : IngredientExplorerEvent()
+}
+
+/**
+ * ViewModel for Ingredient Explorer feature
+ */
+@HiltViewModel
+class IngredientExplorerViewModel @Inject constructor(
+    private val repository: CocktailRepository
+) : BaseViewModel<IngredientExplorerUiState, IngredientExplorerEvent>(IngredientExplorerUiState()) {
+    
+    init {
+        handleEvent(IngredientExplorerEvent.LoadIngredients())
+    }
+    
+    override suspend fun processEvent(event: IngredientExplorerEvent) {
+        when (event) {
+            is IngredientExplorerEvent.LoadIngredients -> loadIngredients(event.forceRefresh)
+            is IngredientExplorerEvent.SelectIngredient -> selectIngredient(event.ingredient)
+            is IngredientExplorerEvent.ClearSelectedIngredient -> clearSelectedIngredient()
+        }
+    }
+    
+    /**
+     * Load all available ingredients
+     */
+    internal suspend fun loadIngredients(forceRefresh: Boolean = false) {
+        updateState { it.copy(
+            isLoading = true, 
+            error = null,
+            selectedIngredient = null,
+            cocktails = emptyList()
+        )}
+        
+        repository.getAllIngredients(forceRefresh).collect { result ->
+            when (result) {
+                is Resource.Success -> {
+                    updateState { it.copy(
+                        isLoading = false,
+                        ingredients = result.data,
+                        error = null
+                    )}
+                }
+                is Resource.Error -> {
+                    updateState { it.copy(
+                        isLoading = false,
+                        error = result.apiError.message
+                    )}
+                    result.apiError.throwable?.let { throwable ->
+                        handleApiError(throwable)
+                    }
+                }
+                is Resource.Loading -> {
+                    updateState { it.copy(isLoading = true) }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Select an ingredient and load related cocktails
+     */
+    internal suspend fun selectIngredient(ingredient: IngredientItem) {
+        updateState { it.copy(
+            isLoading = true,
+            selectedIngredient = ingredient,
+            cocktails = emptyList(),
+            error = null
+        )}
+        
+        repository.getCocktailsByIngredient(ingredient.name).collect { result ->
+            when (result) {
+                is Resource.Success -> {
+                    updateState { it.copy(
+                        isLoading = false,
+                        cocktails = result.data,
+                        error = null
+                    )}
+                }
+                is Resource.Error -> {
+                    updateState { it.copy(
+                        isLoading = false,
+                        error = result.apiError.message
+                    )}
+                    result.apiError.throwable?.let { throwable ->
+                        handleApiError(throwable)
+                    }
+                }
+                is Resource.Loading -> {
+                    updateState { it.copy(isLoading = true) }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Clear selected ingredient
+     */
+    internal fun clearSelectedIngredient() {
+        updateState { it.copy(
+            selectedIngredient = null,
+            cocktails = emptyList()
+        )}
+    }
+} 

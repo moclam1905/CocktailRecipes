@@ -118,7 +118,11 @@ fun SettingsScreen(
             // Theme Selection
             ThemeSelectionSection(
                 currentTheme = uiState.themeMode,
-                onThemeSelected = viewModel::setThemeMode
+                onThemeSelected = { theme ->
+                    scope.launch {
+                        viewModel.handleEvent(SettingsEvent.SetThemeMode(theme))
+                    }
+                }
             )
 
             Divider()
@@ -126,7 +130,11 @@ fun SettingsScreen(
             // Cache Clearing
             CacheClearingSection(
                 isClearing = uiState.isCacheClearing,
-                onClearCache = viewModel::showClearCacheConfirmation
+                onClearCache = {
+                    scope.launch {
+                        viewModel.handleEvent(SettingsEvent.ShowClearCacheConfirmation)
+                    }
+                }
             )
 
             Divider()
@@ -146,21 +154,33 @@ fun SettingsScreen(
     // Confirmation dialog for cache clearing
     if (uiState.showClearCacheConfirmation) {
         AlertDialog(
-            onDismissRequest = viewModel::dismissClearCacheConfirmation,
+            onDismissRequest = {
+                scope.launch {
+                    viewModel.handleEvent(SettingsEvent.DismissClearCacheConfirmation)
+                }
+            },
             title = { Text(stringResource(R.string.cache_confirmation_title)) },
             text = {
                 Text(stringResource(R.string.cache_confirmation_message))
             },
             confirmButton = {
                 Button(
-                    onClick = viewModel::clearCache
+                    onClick = {
+                        scope.launch {
+                            viewModel.handleEvent(SettingsEvent.ClearCache)
+                        }
+                    }
                 ) {
                     Text(stringResource(R.string.clear_button))
                 }
             },
             dismissButton = {
                 TextButton(
-                    onClick = viewModel::dismissClearCacheConfirmation
+                    onClick = {
+                        scope.launch {
+                            viewModel.handleEvent(SettingsEvent.DismissClearCacheConfirmation)
+                        }
+                    }
                 ) {
                     Text(stringResource(R.string.cancel))
                 }

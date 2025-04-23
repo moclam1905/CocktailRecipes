@@ -1,20 +1,19 @@
 package com.nguyenmoclam.cocktailrecipes.ui.settings
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nguyenmoclam.cocktailrecipes.data.local.PreferencesManager
 import com.nguyenmoclam.cocktailrecipes.domain.repository.SettingsRepository
+import com.nguyenmoclam.cocktailrecipes.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * UI state for the Settings screen
+ */
 data class SettingsUiState(
     val themeMode: String = PreferencesManager.THEME_MODE_SYSTEM,
     val appVersion: String = "",
@@ -25,25 +24,49 @@ data class SettingsUiState(
     val apiCacheCleared: Boolean = false
 )
 
+/**
+ * Events for the Settings screen
+ */
+sealed class SettingsEvent {
+    object LoadSettings : SettingsEvent()
+    data class SetThemeMode(val mode: String) : SettingsEvent()
+    object ShowClearCacheConfirmation : SettingsEvent()
+    object DismissClearCacheConfirmation : SettingsEvent()
+    object ClearCache : SettingsEvent()
+}
+
+/**
+ * ViewModel for the Settings screen
+ */
 @HiltViewModel
 open class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository
-) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(SettingsUiState())
-    open val uiState: StateFlow<SettingsUiState> = _uiState
+) : BaseViewModel<SettingsUiState, SettingsEvent>(SettingsUiState()) {
 
     init {
-        loadSettings()
+        handleEvent(SettingsEvent.LoadSettings)
     }
 
-    private fun loadSettings() {
+    override suspend fun processEvent(event: SettingsEvent) {
+        when (event) {
+            is SettingsEvent.LoadSettings -> loadSettings()
+            is SettingsEvent.SetThemeMode -> setThemeMode(event.mode)
+            is SettingsEvent.ShowClearCacheConfirmation -> showClearCacheConfirmation()
+            is SettingsEvent.DismissClearCacheConfirmation -> dismissClearCacheConfirmation()
+            is SettingsEvent.ClearCache -> clearCache()
+        }
+    }
+
+    /**
+     * Load settings from repository
+     */
+    private suspend fun loadSettings() {
+        // Load app version
+        val appVersion = settingsRepository.getAppVersion()
+        updateState { it.copy(appVersion = appVersion) }
+        
+        // Observe theme mode
         viewModelScope.launch {
-            // Load app version
-            val appVersion = settingsRepository.getAppVersion()
-            _uiState.update { it.copy(appVersion = appVersion) }
-            
-            // Observe theme mode
             settingsRepository.getThemeMode()
                 .stateIn(
                     scope = viewModelScope,
@@ -51,64 +74,72 @@ open class SettingsViewModel @Inject constructor(
                     initialValue = PreferencesManager.THEME_MODE_SYSTEM
                 )
                 .collect { themeMode ->
-                    _uiState.update { it.copy(themeMode = themeMode) }
+                    updateState { it.copy(themeMode = themeMode) }
                 }
         }
     }
 
-    fun setThemeMode(mode: String) {
-        viewModelScope.launch {
-            settingsRepository.setThemeMode(mode)
+    /**
+     * Set the theme mode
+     */
+    internal suspend fun setThemeMode(mode: String) {
+        settingsRepository.setThemeMode(mode)
+    }
+
+    /**
+     * Show confirmation dialog for clearing cache
+     */
+    internal fun showClearCacheConfirmation() {
+        updateState { it.copy(showClearCacheConfirmation = true) }
+    }
+
+    /**
+     * Dismiss confirmation dialog for clearing cache
+     */
+    internal fun dismissClearCacheConfirmation() {
+        updateState { it.copy(showClearCacheConfirmation = false) }
+    }
+
+    /**
+     * Clear app and API cache
+     */
+    internal suspend fun clearCache() {
+        updateState { 
+            it.copy(
+                isCacheClearing = true,
+                isApiCacheClearing = true,
+                showClearCacheConfirmation = false,
+                // Reset previously cleared status if trying to clear again
+                cacheCleared = false,
+                apiCacheCleared = false
+            )
         }
-    }
-
-    fun showClearCacheConfirmation() {
-        _uiState.update { it.copy(showClearCacheConfirmation = true) }
-    }
-
-    fun dismissClearCacheConfirmation() {
-        _uiState.update { it.copy(showClearCacheConfirmation = false) }
-    }
-
-    fun clearCache() {
-        viewModelScope.launch {
-            _uiState.update { 
-                it.copy(
-                    isCacheClearing = true,
-                    isApiCacheClearing = true,
-                    showClearCacheConfirmation = false,
-                    // Reset previously cleared status if trying to clear again
-                    cacheCleared = false,
-                    apiCacheCleared = false
-                )
-            }
-            
-            // Clear app database cache
-            val appCacheSuccess = settingsRepository.clearAppCache()
-            
-            // Clear API HTTP cache
-            val apiCacheSuccess = settingsRepository.clearApiCache()
-            
-            // Update with success results
-            _uiState.update { 
-                it.copy(
-                    isCacheClearing = false, 
-                    isApiCacheClearing = false,
-                    cacheCleared = appCacheSuccess,
-                    apiCacheCleared = apiCacheSuccess
-                ) 
-            }
-            
-            // Reset the cache cleared flags after 3 seconds
-            // This ensures the snackbar is displayed and then the flag is reset
-            // so it can be triggered again on the next clear
-            delay(3000)
-            _uiState.update {
-                it.copy(
-                    cacheCleared = false,
-                    apiCacheCleared = false
-                )
-            }
+        
+        // Clear app database cache
+        val appCacheSuccess = settingsRepository.clearAppCache()
+        
+        // Clear API HTTP cache
+        val apiCacheSuccess = settingsRepository.clearApiCache()
+        
+        // Update with success results
+        updateState { 
+            it.copy(
+                isCacheClearing = false, 
+                isApiCacheClearing = false,
+                cacheCleared = appCacheSuccess,
+                apiCacheCleared = apiCacheSuccess
+            ) 
+        }
+        
+        // Reset the cache cleared flags after 3 seconds
+        // This ensures the snackbar is displayed and then the flag is reset
+        // so it can be triggered again on the next clear
+        delay(3000)
+        updateState {
+            it.copy(
+                cacheCleared = false,
+                apiCacheCleared = false
+            )
         }
     }
 } 

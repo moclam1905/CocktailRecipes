@@ -21,6 +21,7 @@ import com.nguyenmoclam.cocktailrecipes.ui.favorites.FavoritesScreen
 import com.nguyenmoclam.cocktailrecipes.ui.filter.FilterScreen
 import com.nguyenmoclam.cocktailrecipes.ui.home.HomeScreen
 import com.nguyenmoclam.cocktailrecipes.ui.ingredients.IngredientExplorerScreen
+import com.nguyenmoclam.cocktailrecipes.ui.mocktail.MocktailCornerScreen
 import com.nguyenmoclam.cocktailrecipes.ui.search.SearchScreen
 import com.nguyenmoclam.cocktailrecipes.ui.settings.SettingsScreen
 
@@ -33,6 +34,7 @@ object NavDestinations {
     const val API_DASHBOARD = "api_dashboard"
     const val INGREDIENT_EXPLORER = "ingredient_explorer"
     const val FILTER = "filter"
+    const val MOCKTAIL_CORNER = "mocktail_corner"
     const val COCKTAIL_ID_ARG = "cocktailId"
 }
 
@@ -96,6 +98,9 @@ fun AppNavigation(
                 },
                 onFilterClick = {
                     navController.navigate(NavDestinations.FILTER)
+                },
+                onMocktailCornerClick = {
+                    navController.navigate(NavDestinations.MOCKTAIL_CORNER)
                 }
             )
         }
@@ -109,7 +114,10 @@ fun AppNavigation(
                 },
                 onFilterClick = {
                     navController.navigate(NavDestinations.FILTER)
-                }
+                },
+                onBackPressed = {
+                    navController.popBackStack()
+                },
             )
         }
         
@@ -167,6 +175,19 @@ fun AppNavigation(
             route = NavDestinations.FILTER
         ) {
             FilterScreen(
+                onBackPressed = {
+                    navController.popBackStack()
+                },
+                onCocktailClick = { cocktailId ->
+                    navController.navigate("${NavDestinations.COCKTAIL_DETAIL}/$cocktailId")
+                }
+            )
+        }
+        
+        composable(
+            route = NavDestinations.MOCKTAIL_CORNER
+        ) {
+            MocktailCornerScreen(
                 onBackPressed = {
                     navController.popBackStack()
                 },

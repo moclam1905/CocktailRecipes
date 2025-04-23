@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.Science
+import androidx.compose.material.icons.filled.LocalBar
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -68,6 +69,7 @@ fun HomeScreen(
     onSettingsClick: () -> Unit,
     onIngredientExplorerClick: () -> Unit,
     onFilterClick: () -> Unit,
+    onMocktailCornerClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -273,6 +275,23 @@ fun HomeScreen(
                                                 )
                                             }
                                             
+                                            // Add Mocktail Corner feature chip
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(top = 8.dp),
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                FeatureChip(
+                                                    title = "Mocktail Corner",
+                                                    icon = Icons.Default.LocalBar,
+                                                    backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+                                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    onClick = onMocktailCornerClick
+                                                )
+                                            }
+                                            
                                             // Shake tip now as a small, subtle hint
                                             Row(
                                                 modifier = Modifier
@@ -397,7 +416,8 @@ fun HomeScreenPreview() {
             onFavoritesClick = {},
             onSettingsClick = {},
             onIngredientExplorerClick = {},
-            onFilterClick = {}
+            onFilterClick = {},
+            onMocktailCornerClick = {}
         )
     }
 }
