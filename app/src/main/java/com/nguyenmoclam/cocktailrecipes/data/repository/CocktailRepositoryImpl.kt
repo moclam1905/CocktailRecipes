@@ -8,8 +8,11 @@ import com.nguyenmoclam.cocktailrecipes.data.local.CocktailLocalDataSource
 import com.nguyenmoclam.cocktailrecipes.data.local.FavoritesLocalDataSource
 import com.nguyenmoclam.cocktailrecipes.data.mapper.CocktailMapper
 import com.nguyenmoclam.cocktailrecipes.data.mapper.EntityMapper
+import com.nguyenmoclam.cocktailrecipes.data.mapper.toDomainItems
+import com.nguyenmoclam.cocktailrecipes.data.model.IngredientNameDto
 import com.nguyenmoclam.cocktailrecipes.data.remote.CocktailRemoteDataSource
 import com.nguyenmoclam.cocktailrecipes.domain.model.Cocktail
+import com.nguyenmoclam.cocktailrecipes.domain.model.IngredientItem
 import com.nguyenmoclam.cocktailrecipes.domain.repository.CocktailRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -371,6 +374,63 @@ class CocktailRepositoryImpl @Inject constructor(
             is Resource.Loading -> {
                 // This shouldn't happen since remoteDataSource returns either Success or Error
             }
+        }
+    }
+
+    override suspend fun getAllIngredients(): Flow<Resource<List<IngredientItem>>> =
+        getAllIngredients(forceRefresh = false)
+    
+    override suspend fun getAllIngredients(forceRefresh: Boolean): Flow<Resource<List<IngredientItem>>> = flow {
+        emit(Resource.Loading)
+        
+        // If offline, inform user
+        if (!networkMonitor.isNetworkAvailable()) {
+            emit(Resource.error(ApiError.networkError("No internet connection. Cannot fetch ingredients list.")))
+            return@flow
+        }
+        
+        // Fetch ingredient list from API (expecting IngredientNameListResponse)
+        when (val apiResult = remoteDataSource.getIngredientsList()) {
+            is Resource.Success -> {
+                // Map the list of names (IngredientNameDto) to IngredientItem domain models
+                val ingredients = apiResult.data.drinks
+                    ?.mapNotNull { ingredientNameDto ->
+                        ingredientNameDto.name?.let { name ->
+                            IngredientItem(
+                                id = name, // Use name as ID for simplicity as API doesn't provide one
+                                name = name,
+                                description = null, // Not available from this endpoint
+                                type = null, // Not available from this endpoint
+                                isAlcoholic = false // Default to false, cannot determine from this endpoint
+                            )
+                        }
+                    } ?: emptyList()
+                
+                // Could implement caching here in the future if needed
+                
+                emit(Resource.Success(ingredients))
+            }
+            is Resource.Error -> {
+                emit(apiResult)
+            }
+            is Resource.Loading -> {
+                // This shouldn't happen since remoteDataSource returns either Success or Error
+            }
+        }
+    }
+    
+    override suspend fun getCocktailsByIngredient(ingredientName: String): Flow<Resource<List<Cocktail>>> = flow {
+        emit(Resource.Loading)
+        
+        // If offline, inform user
+        if (!networkMonitor.isNetworkAvailable()) {
+            emit(Resource.error(ApiError.networkError("No internet connection. Cannot search by ingredient offline.")))
+            return@flow
+        }
+        
+        // Reusing existing method
+        searchCocktailsByIngredient(ingredientName).collect { result ->
+            emit(result)
         }
     }
 }

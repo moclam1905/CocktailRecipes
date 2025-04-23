@@ -2,6 +2,7 @@ package com.nguyenmoclam.cocktailrecipes.domain.repository
 
 import com.nguyenmoclam.cocktailrecipes.data.common.Resource
 import com.nguyenmoclam.cocktailrecipes.domain.model.Cocktail
+import com.nguyenmoclam.cocktailrecipes.domain.model.IngredientItem
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -91,4 +92,21 @@ interface CocktailRepository {
      * @param forceRefresh If true, ignores cache and fetches fresh data
      */
     suspend fun getRandomCocktail(forceRefresh: Boolean): Flow<Resource<Cocktail>>
+    
+    /**
+     * Get a list of all available ingredients
+     */
+    suspend fun getAllIngredients(): Flow<Resource<List<IngredientItem>>>
+    
+    /**
+     * Get a list of all available ingredients with force refresh option
+     * @param forceRefresh If true, ignores cache and fetches fresh data
+     */
+    suspend fun getAllIngredients(forceRefresh: Boolean): Flow<Resource<List<IngredientItem>>>
+    
+    /**
+     * Get cocktails by selected ingredient name
+     * @param ingredientName The name of the ingredient to filter by
+     */
+    suspend fun getCocktailsByIngredient(ingredientName: String): Flow<Resource<List<Cocktail>>>
 } 

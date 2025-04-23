@@ -2,13 +2,31 @@ package com.nguyenmoclam.cocktailrecipes.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -330,6 +348,58 @@ fun EmptyStateWithAction(
     }
 }
 
+/**
+ * Simple empty search result state showing message
+ */
+@Composable
+fun EmptySearchResult(
+    message: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // Search icon with background
+        Box(
+            modifier = Modifier
+                .size(120.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.tertiaryContainer),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "No results",
+                tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                modifier = Modifier.size(64.dp)
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        Text(
+            text = "No Results Found",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
+        )
+        
+        Spacer(modifier = Modifier.height(12.dp))
+        
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(0.8f)
+        )
+    }
+}
+
 // Previews
 @Preview(showBackground = true)
 @Composable
@@ -375,6 +445,16 @@ fun EmptyStateWithActionPreview() {
             message = "Check your connection and try again, or use offline mode",
             actionText = "Go Offline",
             onAction = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun EmptySearchResultPreview() {
+    CocktailRecipesTheme {
+        EmptySearchResult(
+            message = "We couldn't find any results matching your request"
         )
     }
 } 

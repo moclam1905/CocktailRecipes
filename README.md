@@ -123,24 +123,32 @@ The application follows the MVVM (Model-View-ViewModel) architecture pattern wit
   - Added navigation to cocktail details on selection
   - Fixed dialog state management to prevent unwanted display when returning to Home screen
   - Fixed favorite toggle functionality in random cocktail dialog
+- ✅ **Ingredient Explorer Feature**
+  - Implemented screen foundation and API call for listing ingredients (using corrected parsing for `list.php?i=list`).
+  - Designed and implemented Hexagon Grid layout for displaying ingredients.
+  - Added ingredient image loading with placeholders and error handling.
+  - Implemented view to show related cocktails when an ingredient is selected.
+  - Added zoom/explode animation effect on ingredient selection.
+  - Implemented navigation between ingredients and related cocktails.
+  - Refined related cocktails view with a rotatable, circular "mind-map" style layout showing a limited number of cocktails initially.
+  - Added a "View All" option for the mind-map layout when many related cocktails exist.
 
 ### In Progress
 - 🚧 **API Optimization Enhancements (continuing)**
-  - Implementing rate limiting protection
-    - Creating rate limit interceptor to track API calls
-    - Implementing exponential backoff for rate limit responses
-    - Adding user-facing feedback when rate limits are reached
-    - Storing and respecting rate limit headers from API responses
+  - Implementing rate limiting protection (Interceptor, backoff, UI feedback, header handling - tasks still pending).
 
 ### Coming Soon
-- 🔮 **New Features**
-  - Ingredient Explorer with visual grid
-  - Advanced Filtering Options
+- 🔮 **New Features (Phase 7)**
+  - Advanced Filtering Options (Categories, Glass Types, Alcoholic/Non-Alcoholic)
   - "Mocktail Corner" for non-alcoholic options
   - "Browse by First Letter" Feature with interactive UI
+- 🔮 **General UI/UX Refinements (Phase 7)**
+  - Explore neumorphism design style
+  - Implement subtle haptic feedback
+  - Consider bottom navigation bar design (bar theme)
 - 🔮 **Performance Optimizations**
   - Implementing memory caching for frequently accessed data
-  - Optimizing image loading and caching
+  - Optimizing image loading and caching further
   - Enhancing app startup time
 
 ## 🛠️ Tech Stack

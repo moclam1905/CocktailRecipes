@@ -1,3 +1,47 @@
+# Project Progress
+
+## Current Status: Phase 7 - New Free-API Features (Ongoing)
+
+**Last Updated:** {Date}
+
+### Completed Recently:
+- **Ingredient Explorer Feature:**
+  - Implemented core screen structure and API call.
+  - Designed ingredient list with Hexagon Grid layout.
+  - Added image loading.
+  - Implemented related cocktails view.
+  - Added zoom/explode animation on ingredient selection.
+  - Implemented mind-map style layout for related cocktails (circular, rotatable).
+  - Refined mind-map layout to limit items and add 'View All' functionality.
+  - Fixed API parsing issue for `list.php?i=list` endpoint.
+- **UI/UX:**
+  - Removed redundant Favorites button from HomeScreen TopAppBar.
+
+### Key Milestones Achieved:
+- Project Setup & Architecture (Phase 1)
+- API Integration & Base Models (Phase 2)
+- Main Features (Home, Detail, Search, Favorites) (Phase 3)
+- Polishing & Testing (Loading/Error/Empty States, Offline Capability, Unit/UI Tests) (Phase 4)
+- Settings Screen (Phase 5)
+- API Optimization (Caching, Analytics Dashboard) (Phase 6)
+- "Surprise Me!" Random Cocktail Feature (Phase 7)
+- Ingredient Explorer Feature (Phase 7)
+
+### Ongoing Tasks:
+- API Optimization: Rate Limiting implementation (Phase 6 refinement).
+
+### Next Steps:
+- Implement Advanced Filtering Options (Phase 7).
+- Implement Mocktail Corner Feature (Phase 7).
+- Implement Browse by First Letter Feature (Phase 7).
+
+### Blockers/Issues:
+- None currently identified.
+
+### Notes:
+- The mind-map visualization for ingredient relationships was adapted to show related cocktails around the selected ingredient due to API limitations.
+- Persistent linter errors related to test dependencies (JUnit, Mockito) require investigation into project configuration.
+
 # Implementation Progress
 
 ## Completed

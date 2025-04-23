@@ -305,6 +305,78 @@ fun CocktailImage(
     )
 }
 
+/**
+ * Compact cocktail item card for grid layouts
+ */
+@Composable
+fun CocktailItem(
+    cocktail: Cocktail,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(200.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Cocktail image
+            AsyncImage(
+                model = cocktail.imageUrl,
+                contentDescription = cocktail.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                error = painterResource(R.drawable.placeholder_cocktail),
+                placeholder = painterResource(R.drawable.placeholder_cocktail)
+            )
+            
+            // Gradient overlay for better text visibility
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.7f)
+                            ),
+                            startY = 0f,
+                            endY = 400f
+                        )
+                    )
+            )
+            
+            // Cocktail name
+            Text(
+                text = cocktail.name,
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.White,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(12.dp)
+            )
+            
+            // Favorite icon if cocktail is favorite
+            if (cocktail.isFavorite) {
+                Icon(
+                    imageVector = Icons.Filled.Favorite,
+                    contentDescription = "Favorite",
+                    tint = Color.Red,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .size(24.dp)
+                )
+            }
+        }
+    }
+}
+
 // Previews
 @Preview(showBackground = true)
 @Composable

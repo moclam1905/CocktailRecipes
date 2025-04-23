@@ -2,6 +2,7 @@ package com.nguyenmoclam.cocktailrecipes.data.remote
 
 import com.nguyenmoclam.cocktailrecipes.data.model.DrinkListResponse
 import com.nguyenmoclam.cocktailrecipes.data.model.IngredientListResponse
+import com.nguyenmoclam.cocktailrecipes.data.model.IngredientNameListResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -36,10 +37,10 @@ interface CocktailApiService {
     suspend fun getCocktailDetails(@Query("i") id: String): DrinkListResponse
     
     /**
-     * List all available ingredients
+     * List all available ingredients (returns only names)
      */
     @GET("list.php")
-    suspend fun getIngredientsList(@Query("i") list: String = "list"): IngredientListResponse
+    suspend fun getIngredientsList(@Query("i") list: String = "list"): IngredientNameListResponse
     
     /**
      * Get a random cocktail

@@ -148,4 +148,22 @@ data class IngredientDto(
     
     @Json(name = "strAlcohol")
     val isAlcoholic: String?
+)
+
+/**
+ * API response specifically for the list of ingredient names (from list.php?i=list)
+ */
+@JsonClass(generateAdapter = true)
+data class IngredientNameListResponse(
+    @Json(name = "drinks") // Matches the API structure
+    val drinks: List<IngredientNameDto>?
+)
+
+/**
+ * Data Transfer Object for a single ingredient name from the list.php?i=list endpoint
+ */
+@JsonClass(generateAdapter = true)
+data class IngredientNameDto(
+    @Json(name = "strIngredient1") // Matches the API structure
+    val name: String?
 ) 

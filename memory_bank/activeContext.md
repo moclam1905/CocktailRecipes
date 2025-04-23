@@ -1,7 +1,51 @@
 # Active Context
 
-## Current Focus
-Completing API optimization enhancements and implementing Phase 7 free API features.
+## Current Goal
+Continue development of Phase 7 features for the CocktailRecipes application.
+
+## Current Task Focus
+Completed implementation and refinement of the Ingredient Explorer feature, including:
+- Core functionality and API integration (correcting parsing issues).
+- Hexagon grid layout for ingredients.
+- Zoom/Explode animation on selection.
+- Mind-map style layout (circular, rotatable, limited items) for related cocktails.
+- Handling of large lists with a "View All" option.
+
+## Next Task
+Begin implementation of the **Advanced Filtering Options** feature (Phase 7).
+This involves:
+- Creating the filter screen/panel foundation.
+- Implementing API calls for category, glass, and alcoholic filters.
+- Designing the filter UI.
+- Implementing filter logic.
+
+## Key Files / Areas
+- `memory_bank/tasks.md` (Tracking progress)
+- `app/src/main/java/com/nguyenmoclam/cocktailrecipes/ui/ingredients/` (Completed feature)
+- `app/src/main/java/com/nguyenmoclam/cocktailrecipes/data/` (API service, Repository, Models - Updated)
+- Potentially new `ui/filter` package.
+- `app/src/main/java/com/nguyenmoclam/cocktailrecipes/ui/navigation/AppNavigation.kt` (For adding filter screen navigation)
+
+## Recent Changes / Context
+- Corrected API parsing for ingredient list.
+- Added zoom/explode animation to ingredient selection.
+- Implemented and refined a circular mind-map layout for related cocktails.
+- Introduced state management for showing limited vs. all related cocktails.
+- Added rotation gesture to the mind-map layout.
+- Removed redundant Favorites button from Home screen TopAppBar.
+
+## Blockers/Questions
+- Need to finalize the design theme for the filter UI ("mixology lab" theme mentioned in tasks).
+- Investigate persistent linter errors in test files (JUnit/Mockito references).
+
+## Project Architecture Reminders
+- MVVM with Clean Architecture.
+- Jetpack Compose for UI.
+- Hilt for DI.
+- Retrofit/OkHttp for Networking.
+- Room for Local DB (Favorites).
+- Coroutines/Flow for async.
+- Repository pattern.
 
 ## Active Tasks
 - Implementing rate limiting protection

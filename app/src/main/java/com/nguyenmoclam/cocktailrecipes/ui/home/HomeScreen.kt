@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shuffle
+import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -34,6 +35,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.nguyenmoclam.cocktailrecipes.ui.util.ShakeDetector
@@ -51,6 +53,7 @@ fun HomeScreen(
     onSearchClick: () -> Unit,
     onFavoritesClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onIngredientExplorerClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -107,12 +110,6 @@ fun HomeScreen(
                             Icon(
                                 imageVector = Icons.Default.Search,
                                 contentDescription = stringResource(R.string.search)
-                            )
-                        }
-                        IconButton(onClick = onFavoritesClick) {
-                            Icon(
-                                imageVector = Icons.Default.Favorite,
-                                contentDescription = stringResource(R.string.favorites)
                             )
                         }
                         IconButton(onClick = onSettingsClick) {
@@ -181,6 +178,32 @@ fun HomeScreen(
                             ),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
+                            // Feature Cards
+                            item {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    FeatureCard(
+                                        title = "Ingredients",
+                                        icon = Icons.Default.Science,
+                                        backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                                        modifier = Modifier.weight(1f),
+                                        onClick = onIngredientExplorerClick
+                                    )
+                                    
+                                    FeatureCard(
+                                        title = "Favorites",
+                                        icon = Icons.Default.Favorite,
+                                        backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        modifier = Modifier.weight(1f),
+                                        onClick = onFavoritesClick
+                                    )
+                                }
+                            }
+                            
                             // "Shake for a random cocktail" tip
                             item {
                                 Card(
@@ -269,7 +292,8 @@ fun HomeScreenPreview() {
             onCocktailClick = {},
             onSearchClick = {},
             onFavoritesClick = {},
-            onSettingsClick = {}
+            onSettingsClick = {},
+            onIngredientExplorerClick = {}
         )
     }
 }
@@ -306,5 +330,44 @@ fun HomeScreenContentPreview() {
     
     CocktailRecipesTheme {
         // Preview content
+    }
+}
+
+@Composable
+fun FeatureCard(
+    title: String,
+    icon: ImageVector,
+    backgroundColor: Color,
+    contentColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .height(120.dp)
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = backgroundColor,
+            contentColor = contentColor
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                modifier = Modifier.size(40.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
     }
 } 

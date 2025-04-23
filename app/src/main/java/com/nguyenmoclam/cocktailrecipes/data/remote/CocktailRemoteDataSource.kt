@@ -7,6 +7,7 @@ import com.nguyenmoclam.cocktailrecipes.data.common.Resource
 import com.nguyenmoclam.cocktailrecipes.data.common.RetryHandler
 import com.nguyenmoclam.cocktailrecipes.data.model.DrinkListResponse
 import com.nguyenmoclam.cocktailrecipes.data.model.IngredientListResponse
+import com.nguyenmoclam.cocktailrecipes.data.model.IngredientNameListResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -90,9 +91,9 @@ class CocktailRemoteDataSource @Inject constructor(
     }
 
     /**
-     * Get a list of all ingredients
+     * Get a list of all ingredient names
      */
-    suspend fun getIngredientsList(): Resource<IngredientListResponse> {
+    suspend fun getIngredientsList(): Resource<IngredientNameListResponse> {
         return safeApiCall("list.php?i=list") { 
             apiService.getIngredientsList() 
         }

@@ -15,6 +15,7 @@ import com.nguyenmoclam.cocktailrecipes.ui.analytics.ApiPerformanceDashboard
 import com.nguyenmoclam.cocktailrecipes.ui.detail.CocktailDetailScreen
 import com.nguyenmoclam.cocktailrecipes.ui.favorites.FavoritesScreen
 import com.nguyenmoclam.cocktailrecipes.ui.home.HomeScreen
+import com.nguyenmoclam.cocktailrecipes.ui.ingredients.IngredientExplorerScreen
 import com.nguyenmoclam.cocktailrecipes.ui.search.SearchScreen
 import com.nguyenmoclam.cocktailrecipes.ui.settings.SettingsScreen
 
@@ -25,6 +26,7 @@ object NavDestinations {
     const val FAVORITES = "favorites"
     const val SETTINGS = "settings"
     const val API_DASHBOARD = "api_dashboard"
+    const val INGREDIENT_EXPLORER = "ingredient_explorer"
     const val COCKTAIL_ID_ARG = "cocktailId"
 }
 
@@ -81,6 +83,9 @@ fun AppNavigation(
                 },
                 onSettingsClick = {
                     navController.navigate(NavDestinations.SETTINGS)
+                },
+                onIngredientExplorerClick = {
+                    navController.navigate(NavDestinations.INGREDIENT_EXPLORER)
                 }
             )
         }
@@ -128,6 +133,19 @@ fun AppNavigation(
                 onGenerateReport = { /* Handle report generation */ },
                 onDismiss = {
                     navController.popBackStack()
+                }
+            )
+        }
+        
+        composable(
+            route = NavDestinations.INGREDIENT_EXPLORER
+        ) {
+            IngredientExplorerScreen(
+                onBackPressed = {
+                    navController.popBackStack()
+                },
+                onCocktailClick = { cocktailId ->
+                    navController.navigate("${NavDestinations.COCKTAIL_DETAIL}/$cocktailId")
                 }
             )
         }
