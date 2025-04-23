@@ -23,6 +23,8 @@ Built with cutting-edge Android development practices, this app also showcases t
 - ⚙️ **Settings** - Customize your experience with theme selection and cache management
 - 📊 **Analytics** - View API performance metrics and optimize app experience
 - 🎲 **Surprise Me!** - Shake your device to discover random cocktails with beautiful animations
+- 🧪 **Filter Lab** - Apply multiple filters like category, glass type, and alcohol content
+- 🌿 **Ingredient Explorer** - Browse ingredients in an interactive hexagon grid and discover related cocktails
 
 ## 🧪 Did You Know?
 
@@ -108,12 +110,16 @@ The application follows the MVVM (Model-View-ViewModel) architecture pattern wit
     - Implemented cache control headers for GET requests
     - Added cache invalidation logic for time-sensitive data
     - Created mechanism to force refresh data regardless of cache
+  - Implemented rate limiting protection
+    - Created rate limit interceptor to track API calls
+    - Added exponential backoff for rate limit responses
+    - Implemented comprehensive UI feedback when rate limits are reached
+    - Created BaseViewModel pattern to standardize rate limit error handling
   - Added analytics for API call performance
     - Created performance tracking interceptor to log call durations
     - Implemented error rate tracking mechanism
     - Added reporting system for slow or failed API calls
     - Created API performance dashboard with metrics visualization
-    - Fixed dependency cycle between analytics components using Dagger Provider
 - ✅ **"Surprise Me!" Random Cocktail Feature**
   - Created a "Surprise Me" floating action button on Home screen
   - Implemented Random Cocktail API integration using random.php endpoint
@@ -121,31 +127,35 @@ The application follows the MVVM (Model-View-ViewModel) architecture pattern wit
   - Implemented 3D Card Flip animation for result reveal
   - Created custom loading animation (pouring cocktail)
   - Added navigation to cocktail details on selection
-  - Fixed dialog state management to prevent unwanted display when returning to Home screen
-  - Fixed favorite toggle functionality in random cocktail dialog
 - ✅ **Ingredient Explorer Feature**
-  - Implemented screen foundation and API call for listing ingredients (using corrected parsing for `list.php?i=list`).
-  - Designed and implemented Hexagon Grid layout for displaying ingredients.
-  - Added ingredient image loading with placeholders and error handling.
-  - Implemented view to show related cocktails when an ingredient is selected.
-  - Added zoom/explode animation effect on ingredient selection.
-  - Implemented navigation between ingredients and related cocktails.
-  - Refined related cocktails view with a rotatable, circular "mind-map" style layout showing a limited number of cocktails initially.
-  - Added a "View All" option for the mind-map layout when many related cocktails exist.
+  - Created Ingredient Explorer screen with hexagon grid layout
+  - Implemented API integration for listing all ingredients
+  - Added interactive animations with zoom/explode effects
+  - Created mind-map visualization for ingredient relationships
+  - Implemented navigation between ingredients and related cocktails
+- ✅ **Advanced Filtering Options**
+  - Created filter screen with "mixology lab" theme
+  - Implemented category, glass type, and alcoholic/non-alcoholic filtering
+  - Added animated filter results with staggered transitions
+  - Created filter preferences persistence using DataStore
+  - Implemented filter combination logic for complex searches
+  - Optimized performance with parallel API loading
 
 ### In Progress
-- 🚧 **API Optimization Enhancements (continuing)**
-  - Implementing rate limiting protection (Interceptor, backoff, UI feedback, header handling - tasks still pending).
+- 🚧 **"Mocktail Corner" Feature**
+  - Adding dedicated section for non-alcoholic drinks
+  - Designing "garden-inspired" UI theme
+  - Implementing special visual effects and animations
 
 ### Coming Soon
-- 🔮 **New Features (Phase 7)**
-  - Advanced Filtering Options (Categories, Glass Types, Alcoholic/Non-Alcoholic)
-  - "Mocktail Corner" for non-alcoholic options
-  - "Browse by First Letter" Feature with interactive UI
-- 🔮 **General UI/UX Refinements (Phase 7)**
-  - Explore neumorphism design style
-  - Implement subtle haptic feedback
-  - Consider bottom navigation bar design (bar theme)
+- 🔮 **"Browse by First Letter" Feature**
+  - Creating alphabetical browsing with rotary wheel UI
+  - Adding "pouring results" animation when letter is selected
+  - Implementing lazy loading for letter-based results
+- 🔮 **General UI/UX Refinements**
+  - Exploring neumorphism design style
+  - Implementing subtle haptic feedback
+  - Designing bottom navigation bar with bar theme
 - 🔮 **Performance Optimizations**
   - Implementing memory caching for frequently accessed data
   - Optimizing image loading and caching further

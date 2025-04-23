@@ -17,6 +17,8 @@
    - Search cocktails by name
    - Filter by ingredient
    - View search history and recently viewed cocktails
+   - Advanced filtering options (category, glass type, alcoholic/non-alcoholic)
+   - Filter persistence using DataStore
    
 3. **Favorites & Offline Access**
    - Save favorite recipes to Room database
@@ -37,11 +39,32 @@
    - Track API call performance
    - Monitor error rates and slow requests
    - Visualize performance metrics
-   
+   - Dashboard with detailed statistics
+
 7. **"Surprise Me!" Feature**
    - Discover random cocktails with a tap
    - Shake device to activate
    - Enjoy fluid animations including 3D card flip and pouring effects
+   - Quick access to cocktail details
+
+8. **Ingredient Explorer**
+   - Browse ingredients in a visually appealing hexagon grid
+   - View ingredient details and related cocktails
+   - Enjoy interactive animations when selecting ingredients
+   - Mind-map visualization for ingredient relationships
+
+## Upcoming Features
+1. **"Mocktail Corner" Feature**
+   - Dedicated section for non-alcoholic drinks
+   - "Garden-inspired" UI theme
+   - Special visual effects and animations
+   - Promotional content for alcohol-free options
+
+2. **"Browse by First Letter" Feature**
+   - Alphabetical browsing with interactive UI
+   - Rotary wheel or 3D carousel for letter selection
+   - Visual animations for selection feedback
+   - Lazy loading for performance optimization
 
 ## Target Audience
 - Cocktail enthusiasts looking for inspiration
@@ -57,3 +80,5 @@
 - Random cocktail discovery interaction rate
 - Session duration and retention statistics
 - Offline usage patterns
+- Filter usage and combination metrics
+- Ingredient explorer interaction frequency

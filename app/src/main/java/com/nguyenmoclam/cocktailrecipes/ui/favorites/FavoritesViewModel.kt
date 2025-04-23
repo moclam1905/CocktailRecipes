@@ -1,38 +1,39 @@
 package com.nguyenmoclam.cocktailrecipes.ui.favorites
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nguyenmoclam.cocktailrecipes.data.common.Resource
 import com.nguyenmoclam.cocktailrecipes.domain.model.Cocktail
 import com.nguyenmoclam.cocktailrecipes.domain.repository.CocktailRepository
+import com.nguyenmoclam.cocktailrecipes.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
     private val repository: CocktailRepository
-) : ViewModel() {
-    
-    private val _uiState = MutableStateFlow(FavoritesUiState())
-    val uiState: StateFlow<FavoritesUiState> = _uiState.asStateFlow()
+) : BaseViewModel<FavoritesUiState, FavoritesUiEvent>(FavoritesUiState()) {
     
     init {
         loadFavorites()
     }
     
+    override suspend fun processEvent(event: FavoritesUiEvent) {
+        when (event) {
+            is FavoritesUiEvent.LoadFavorites -> loadFavorites()
+            is FavoritesUiEvent.RemoveFavorite -> removeFavorite(event.cocktailId)
+        }
+    }
+    
     fun loadFavorites() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            updateState { it.copy(isLoading = true, error = null) }
             
             repository.getFavorites().collect { result ->
                 when (result) {
                     is Resource.Success -> {
-                        _uiState.update { 
+                        updateState { 
                             it.copy(
                                 isLoading = false,
                                 favorites = result.data ?: emptyList(),
@@ -41,7 +42,10 @@ class FavoritesViewModel @Inject constructor(
                         }
                     }
                     is Resource.Error -> {
-                        _uiState.update { 
+                        // Check for rate limit errors
+                        result.apiError.throwable?.let { throwable -> handleApiError(throwable) }
+                        
+                        updateState { 
                             it.copy(
                                 isLoading = false,
                                 error = result.apiError.message
@@ -49,7 +53,7 @@ class FavoritesViewModel @Inject constructor(
                         }
                     }
                     is Resource.Loading -> {
-                        _uiState.update { it.copy(isLoading = true) }
+                        updateState { it.copy(isLoading = true) }
                     }
                 }
             }
@@ -62,6 +66,9 @@ class FavoritesViewModel @Inject constructor(
                 if (result is Resource.Success) {
                     // Reload favorites after removal
                     loadFavorites()
+                } else if (result is Resource.Error) {
+                    // Check for rate limit errors
+                    result.apiError.throwable?.let { throwable -> handleApiError(throwable) }
                 }
             }
         }
@@ -72,4 +79,9 @@ data class FavoritesUiState(
     val isLoading: Boolean = false,
     val favorites: List<Cocktail> = emptyList(),
     val error: String? = null
-) 
+)
+
+sealed class FavoritesUiEvent {
+    object LoadFavorites : FavoritesUiEvent()
+    data class RemoveFavorite(val cocktailId: String) : FavoritesUiEvent()
+} 

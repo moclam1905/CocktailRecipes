@@ -1,45 +1,46 @@
 # Active Context
 
 ## Current Goal
-Continue development of Phase 7 features for the CocktailRecipes application.
+Continue development of Phase 7 features for the CocktailRecipes application and improve core architecture.
 
 ## Current Task Focus
-Completed implementation and refinement of the Ingredient Explorer feature, including:
-- Core functionality and API integration (correcting parsing issues).
-- Hexagon grid layout for ingredients.
-- Zoom/Explode animation on selection.
-- Mind-map style layout (circular, rotatable, limited items) for related cocktails.
-- Handling of large lists with a "View All" option.
+Completed implementation of Rate Limit Error Handling and BaseViewModel standardization, including:
+- Updated BaseViewModel with Rate Limit error handling
+- Created RateLimitErrorObserver component for error display
+- Integrated BaseScreen as foundation for all screens
+- Converted all ViewModels to inherit from BaseViewModel
 
 ## Next Task
-Begin implementation of the **Advanced Filtering Options** feature (Phase 7).
+Begin implementation of the **"Mocktail Corner" Feature** (Phase 7).
 This involves:
-- Creating the filter screen/panel foundation.
-- Implementing API calls for category, glass, and alcoholic filters.
-- Designing the filter UI.
-- Implementing filter logic.
+- Adding dedicated section for non-alcoholic drinks
+- Implementing API integration with filter.php?a=Non_Alcoholic
+- Designing "garden-inspired" UI theme
+- Adding special visual effects and animations
 
 ## Key Files / Areas
-- `memory_bank/tasks.md` (Tracking progress)
-- `app/src/main/java/com/nguyenmoclam/cocktailrecipes/ui/ingredients/` (Completed feature)
-- `app/src/main/java/com/nguyenmoclam/cocktailrecipes/data/` (API service, Repository, Models - Updated)
-- Potentially new `ui/filter` package.
-- `app/src/main/java/com/nguyenmoclam/cocktailrecipes/ui/navigation/AppNavigation.kt` (For adding filter screen navigation)
+- `app/src/main/java/com/nguyenmoclam/cocktailrecipes/ui/base/BaseViewModel.kt` (Updated)
+- `app/src/main/java/com/nguyenmoclam/cocktailrecipes/ui/base/BaseScreen.kt` (Created)
+- `app/src/main/java/com/nguyenmoclam/cocktailrecipes/ui/common/RateLimitHandlingExt.kt` (Optimized)
+- `app/src/main/java/com/nguyenmoclam/cocktailrecipes/ui/components/RateLimitErrorObserver.kt` (Created)
+- `app/src/main/java/com/nguyenmoclam/cocktailrecipes/ui/filter/FilterViewModel.kt` (Updated)
+- `app/src/main/java/com/nguyenmoclam/cocktailrecipes/ui/search/SearchViewModel.kt` (Updated)
+- `app/src/main/java/com/nguyenmoclam/cocktailrecipes/ui/detail/CocktailDetailViewModel.kt` (Updated)
+- `app/src/main/java/com/nguyenmoclam/cocktailrecipes/ui/favorites/FavoritesViewModel.kt` (Updated)
 
 ## Recent Changes / Context
-- Corrected API parsing for ingredient list.
-- Added zoom/explode animation to ingredient selection.
-- Implemented and refined a circular mind-map layout for related cocktails.
-- Introduced state management for showing limited vs. all related cocktails.
-- Added rotation gesture to the mind-map layout.
-- Removed redundant Favorites button from Home screen TopAppBar.
+- Implemented centralized Rate Limit Error Handling
+- Standardized architecture with BaseViewModel and BaseScreen
+- Integrated Rate Limit error handling across all main screens
+- Removed redundant code and optimized error handling
 
 ## Blockers/Questions
-- Need to finalize the design theme for the filter UI ("mixology lab" theme mentioned in tasks).
-- Investigate persistent linter errors in test files (JUnit/Mockito references).
+- Need to finalize the design theme for the "Mocktail Corner" UI ("garden-inspired" theme mentioned in tasks).
+- Consider whether to implement bottom navigation bar for better navigation between features.
 
 ## Project Architecture Reminders
 - MVVM with Clean Architecture.
+- **BaseViewModel and BaseScreen** for standardized architecture and error handling.
 - Jetpack Compose for UI.
 - Hilt for DI.
 - Retrofit/OkHttp for Networking.
@@ -48,31 +49,30 @@ This involves:
 - Repository pattern.
 
 ## Active Tasks
-- Implementing rate limiting protection
-  - Creating rate limit interceptor to track API calls (0.5h)
-  - Implementing exponential backoff for rate limit responses (0.5h)
-  - Adding user-facing feedback when rate limits are reached (0.5h)
-  - Storing and respecting rate limit headers from API responses (0.5h)
-- Begin implementing Ingredient Explorer Feature 
-  - Create Ingredient Explorer screen foundation (1h)
-  - Implement API call to fetch all ingredients using list.php?i=list (1h)
-  - Design UI with Hexagon Grid layout for ingredients (1.5h)
+- Planning implementation of "Mocktail Corner" Feature:
+  - Add dedicated section/tab for non-alcoholic drinks (1h)
+  - Implement API integration with filter.php?a=Non_Alcoholic (1h)
+  - Design "garden-inspired" UI theme for Mocktail section (2h)
+  - Add special visual effects (water/fruit animations) (1.5h)
+  - Add promotional content highlighting benefits of alcohol-free options (1h)
+  - Implement wave-style scroll animation (1h)
 
 ## Recently Completed
-- Implemented "Surprise Me!" Random Cocktail Feature
-  - Created a "Surprise Me" floating action button on Home screen
-  - Implemented Random Cocktail API integration using random.php endpoint
-  - Added Shake-to-Activate gesture functionality with ShakeDetector
-  - Implemented 3D Card Flip animation for result reveal
-  - Created custom loading animation (pouring cocktail)
-  - Fixed dialog state management to prevent unwanted display when returning to Home screen
-  - Fixed issue with favorite toggle functionality in random cocktail dialog
-- Fixed SettingsRepositoryImpl cache clearing functionality to use Dispatchers.IO
-  - Resolved "Cannot access database on the main thread" error
-  - Improved app stability during cache clearing operations
-- Updated API Performance Dashboard UI with CenterAlignedTopAppBar
-  - Created consistent UI navigation and experience
-  - Enhanced dashboard visual presentation
+- Implemented Rate Limit Error Handling
+  - Created centralized error handling in BaseViewModel
+  - Implemented RateLimitErrorObserver component
+  - Standardized error display with Snackbar/Toast
+  - Integrated error handling across all ViewModels
+- Standardized architecture with BaseViewModel
+  - Converted SearchViewModel to BaseViewModel
+  - Converted CocktailDetailViewModel to BaseViewModel
+  - Converted FavoritesViewModel to BaseViewModel
+  - Implemented BaseScreen component
+- Fixed filtering options with "mixology lab" theme
+  - Integrated filter persistence and state management
+  - Implemented animated transitions for filter results
+  - Added clear filter functionality
+  - Optimized performance with parallel API loading
 
 ## Dependencies Added
 - Hilt for dependency injection ✅
@@ -114,13 +114,42 @@ This involves:
 - API performance tracking and dashboard have been implemented ✅
 - Fixed database operations to run properly on background threads using Dispatchers.IO ✅
 - "Surprise Me!" Random Cocktail Feature has been implemented with shake gesture and animations ✅
+- Ingredient Explorer has been implemented with hexagon grid and mind-map visualization ✅
+- Advanced Filtering Options have been implemented with "mixology lab" theme ✅
+- Rate Limit Error Handling has been standardized across the application ✅
 - New features planned for Phase 7 (remaining):
-  - Ingredient Explorer with detailed ingredient views (Next to implement)
-  - Advanced Filtering Options (by category, glass type, alcoholic/non-alcoholic)
-  - "Mocktail Corner" dedicated section for non-alcoholic drinks
+  - "Mocktail Corner" dedicated section for non-alcoholic drinks (Next to implement)
   - "Browse by First Letter" alphabetical navigation
-- Current focus is completing rate limiting protection and beginning implementation of Ingredient Explorer feature
-- Important note: Database operations should always use Dispatchers.IO to avoid main thread blocking and UI freezes
-  - This applies to Room database queries, updates, inserts, deletes
-  - Also needed for DataStore preferences editing operations for consistency
-- Fixed an issue with the RandomCocktailCard favorite toggle functionality - the code wasn't finding the cocktail in the main list. Fixed by updating the toggleFavorite method to also check the randomCocktail property.
+  - General UI/UX Refinements
+- Important note: All ViewModels should now inherit from BaseViewModel for standardized error handling
+- BaseScreen should be used as foundation for all screens to ensure consistent UI structure and error handling
+- Important reminder: Database operations should always use Dispatchers.IO to avoid main thread blocking
+
+## Current Implementation Status
+
+Rate Limit Error Handling and architectural improvements have been fully implemented:
+
+1. **BaseViewModel & Error Handling**
+   - Updated BaseViewModel with Rate Limit error handling ✅
+   - Created RateLimitErrorObserver component ✅
+   - Optimized RateLimitHandlingExt utilities ✅
+   - Standardized error display with Snackbar/Toast ✅
+
+2. **BaseScreen & UI Standardization**
+   - Created BaseScreen component for consistent UI structure ✅
+   - Integrated Rate Limit error handling at UI level ✅
+   - Added flexibility for both BaseViewModel and regular ViewModel ✅
+   - Standardized UI layout with proper padding and structure ✅
+
+3. **ViewModel Standardization**
+   - Converted SearchViewModel to BaseViewModel ✅
+   - Converted CocktailDetailViewModel to BaseViewModel ✅
+   - Converted FavoritesViewModel to BaseViewModel ✅
+   - HomeViewModel was already using BaseViewModel ✅
+
+4. **Pending Features**
+   - "Mocktail Corner" Feature (next to implement)
+   - "Browse by First Letter" Feature
+   - General UI/UX Refinements
+
+The codebase now has a robust, standardized architecture with consistent error handling across all features.

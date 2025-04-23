@@ -9,9 +9,14 @@ import com.nguyenmoclam.cocktailrecipes.data.local.FavoritesLocalDataSource
 import com.nguyenmoclam.cocktailrecipes.data.mapper.CocktailMapper
 import com.nguyenmoclam.cocktailrecipes.data.mapper.EntityMapper
 import com.nguyenmoclam.cocktailrecipes.data.mapper.toDomainItems
+import com.nguyenmoclam.cocktailrecipes.data.mapper.toDomainModels
 import com.nguyenmoclam.cocktailrecipes.data.model.IngredientNameDto
 import com.nguyenmoclam.cocktailrecipes.data.remote.CocktailRemoteDataSource
+import com.nguyenmoclam.cocktailrecipes.domain.model.AlcoholicFilter
+import com.nguyenmoclam.cocktailrecipes.domain.model.Category
 import com.nguyenmoclam.cocktailrecipes.domain.model.Cocktail
+import com.nguyenmoclam.cocktailrecipes.domain.model.CocktailFilter
+import com.nguyenmoclam.cocktailrecipes.domain.model.Glass
 import com.nguyenmoclam.cocktailrecipes.domain.model.IngredientItem
 import com.nguyenmoclam.cocktailrecipes.domain.repository.CocktailRepository
 import kotlinx.coroutines.flow.Flow
@@ -431,6 +436,302 @@ class CocktailRepositoryImpl @Inject constructor(
         // Reusing existing method
         searchCocktailsByIngredient(ingredientName).collect { result ->
             emit(result)
+        }
+    }
+
+    override suspend fun getCocktailsByFirstLetter(letter: String): Flow<Resource<List<Cocktail>>> = flow {
+        emit(Resource.Loading)
+        
+        // If offline, inform user
+        if (!networkMonitor.isNetworkAvailable()) {
+            emit(Resource.error(ApiError.networkError("No internet connection. Cannot search by first letter offline.")))
+            return@flow
+        }
+        
+        // Search by first letter using API
+        when (val apiResult = remoteDataSource.getCocktailsByFirstLetter(letter)) {
+            is Resource.Success -> {
+                val cocktails = CocktailMapper.mapDrinkListResponseToCocktails(apiResult.data)
+                
+                // Cache the results
+                if (cocktails.isNotEmpty()) {
+                    val entities = EntityMapper.mapCocktailsToEntities(cocktails)
+                    localDataSource.saveCocktails(entities)
+                }
+                
+                emit(Resource.Success(cocktails))
+            }
+            is Resource.Error -> {
+                emit(apiResult)
+            }
+            is Resource.Loading -> {
+                // This shouldn't happen since remoteDataSource returns either Success or Error
+            }
+        }
+    }
+    
+    override suspend fun getAllCategories(): Flow<Resource<List<Category>>> = flow {
+        emit(Resource.Loading)
+        
+        // If offline, inform user
+        if (!networkMonitor.isNetworkAvailable()) {
+            emit(Resource.error(ApiError.networkError("No internet connection. Cannot fetch categories.")))
+            return@flow
+        }
+        
+        // Get categories from API
+        when (val apiResult = remoteDataSource.getCategoryList()) {
+            is Resource.Success -> {
+                val categories = apiResult.data.toDomainModels()
+                emit(Resource.Success(categories))
+            }
+            is Resource.Error -> {
+                emit(apiResult)
+            }
+            is Resource.Loading -> {
+                // This shouldn't happen since remoteDataSource returns either Success or Error
+            }
+        }
+    }
+    
+    override suspend fun getAllGlassTypes(): Flow<Resource<List<Glass>>> = flow {
+        emit(Resource.Loading)
+        
+        // If offline, inform user
+        if (!networkMonitor.isNetworkAvailable()) {
+            emit(Resource.error(ApiError.networkError("No internet connection. Cannot fetch glass types.")))
+            return@flow
+        }
+        
+        // Get glass types from API
+        when (val apiResult = remoteDataSource.getGlassList()) {
+            is Resource.Success -> {
+                val glassTypes = apiResult.data.toDomainModels()
+                emit(Resource.Success(glassTypes))
+            }
+            is Resource.Error -> {
+                emit(apiResult)
+            }
+            is Resource.Loading -> {
+                // This shouldn't happen since remoteDataSource returns either Success or Error
+            }
+        }
+    }
+    
+    override suspend fun getAllAlcoholicFilters(): Flow<Resource<List<AlcoholicFilter>>> = flow {
+        emit(Resource.Loading)
+        
+        // If offline, inform user
+        if (!networkMonitor.isNetworkAvailable()) {
+            emit(Resource.error(ApiError.networkError("No internet connection. Cannot fetch alcoholic filters.")))
+            return@flow
+        }
+        
+        // Get alcoholic filters from API
+        when (val apiResult = remoteDataSource.getAlcoholicList()) {
+            is Resource.Success -> {
+                val alcoholicFilters = apiResult.data.toDomainModels()
+                emit(Resource.Success(alcoholicFilters))
+            }
+            is Resource.Error -> {
+                emit(apiResult)
+            }
+            is Resource.Loading -> {
+                // This shouldn't happen since remoteDataSource returns either Success or Error
+            }
+        }
+    }
+    
+    override suspend fun getCocktailsByCategory(category: String): Flow<Resource<List<Cocktail>>> = flow {
+        emit(Resource.Loading)
+        
+        // If offline, inform user
+        if (!networkMonitor.isNetworkAvailable()) {
+            emit(Resource.error(ApiError.networkError("No internet connection. Cannot filter by category offline.")))
+            return@flow
+        }
+        
+        // Filter by category using API
+        when (val apiResult = remoteDataSource.filterByCategory(category)) {
+            is Resource.Success -> {
+                val cocktails = CocktailMapper.mapDrinkListResponseToCocktails(apiResult.data)
+                
+                // Cache the results
+                if (cocktails.isNotEmpty()) {
+                    val entities = EntityMapper.mapCocktailsToEntities(cocktails)
+                    localDataSource.saveCocktails(entities)
+                }
+                
+                emit(Resource.Success(cocktails))
+            }
+            is Resource.Error -> {
+                emit(apiResult)
+            }
+            is Resource.Loading -> {
+                // This shouldn't happen since remoteDataSource returns either Success or Error
+            }
+        }
+    }
+    
+    override suspend fun getCocktailsByGlassType(glass: String): Flow<Resource<List<Cocktail>>> = flow {
+        emit(Resource.Loading)
+        
+        // If offline, inform user
+        if (!networkMonitor.isNetworkAvailable()) {
+            emit(Resource.error(ApiError.networkError("No internet connection. Cannot filter by glass type offline.")))
+            return@flow
+        }
+        
+        // Filter by glass type using API
+        when (val apiResult = remoteDataSource.filterByGlass(glass)) {
+            is Resource.Success -> {
+                val cocktails = CocktailMapper.mapDrinkListResponseToCocktails(apiResult.data)
+                
+                // Cache the results
+                if (cocktails.isNotEmpty()) {
+                    val entities = EntityMapper.mapCocktailsToEntities(cocktails)
+                    localDataSource.saveCocktails(entities)
+                }
+                
+                emit(Resource.Success(cocktails))
+            }
+            is Resource.Error -> {
+                emit(apiResult)
+            }
+            is Resource.Loading -> {
+                // This shouldn't happen since remoteDataSource returns either Success or Error
+            }
+        }
+    }
+    
+    override suspend fun getCocktailsByAlcoholicFilter(alcoholic: String): Flow<Resource<List<Cocktail>>> = flow {
+        emit(Resource.Loading)
+        
+        // If offline, inform user
+        if (!networkMonitor.isNetworkAvailable()) {
+            emit(Resource.error(ApiError.networkError("No internet connection. Cannot filter by alcoholic type offline.")))
+            return@flow
+        }
+        
+        // Filter by alcoholic type using API
+        when (val apiResult = remoteDataSource.filterByAlcoholic(alcoholic)) {
+            is Resource.Success -> {
+                val cocktails = CocktailMapper.mapDrinkListResponseToCocktails(apiResult.data)
+                
+                // Cache the results
+                if (cocktails.isNotEmpty()) {
+                    val entities = EntityMapper.mapCocktailsToEntities(cocktails)
+                    localDataSource.saveCocktails(entities)
+                }
+                
+                emit(Resource.Success(cocktails))
+            }
+            is Resource.Error -> {
+                emit(apiResult)
+            }
+            is Resource.Loading -> {
+                // This shouldn't happen since remoteDataSource returns either Success or Error
+            }
+        }
+    }
+    
+    override suspend fun getCocktailsByFilter(filter: CocktailFilter): Flow<Resource<List<Cocktail>>> = flow {
+        emit(Resource.Loading)
+        
+        // If no filters are active, return empty list
+        if (!filter.hasActiveFilters()) {
+            emit(Resource.Success(emptyList()))
+            return@flow
+        }
+        
+        // If offline, inform user
+        if (!networkMonitor.isNetworkAvailable()) {
+            emit(Resource.error(ApiError.networkError("No internet connection. Cannot apply filters offline.")))
+            return@flow
+        }
+        
+        try {
+            // Start with a filter that's guaranteed to be present
+            var resultCocktails: List<Cocktail>? = null
+            var fetchedAny = false
+            
+            // Apply category filter if present
+            if (!filter.category.isNullOrEmpty()) {
+                when (val apiResult = remoteDataSource.filterByCategory(filter.category)) {
+                    is Resource.Success -> {
+                        val cocktails = CocktailMapper.mapDrinkListResponseToCocktails(apiResult.data)
+                        resultCocktails = cocktails
+                        fetchedAny = true
+                    }
+                    is Resource.Error -> {
+                        emit(apiResult)
+                        return@flow
+                    }
+                    else -> {}
+                }
+            }
+            
+            // Apply glass filter if present
+            if (!filter.glass.isNullOrEmpty()) {
+                when (val apiResult = remoteDataSource.filterByGlass(filter.glass)) {
+                    is Resource.Success -> {
+                        val cocktails = CocktailMapper.mapDrinkListResponseToCocktails(apiResult.data)
+                        if (resultCocktails == null) {
+                            resultCocktails = cocktails
+                        } else {
+                            // Intersect with previous results - only keep cocktails that match all filters
+                            resultCocktails = resultCocktails.filter { existing ->
+                                cocktails.any { it.id == existing.id }
+                            }
+                        }
+                        fetchedAny = true
+                    }
+                    is Resource.Error -> {
+                        if (!fetchedAny) { // Only emit error if no other filter was successful
+                            emit(apiResult)
+                            return@flow
+                        }
+                        // Otherwise continue with partial results
+                    }
+                    else -> {}
+                }
+            }
+            
+            // Apply alcoholic filter if present
+            if (!filter.alcoholic.isNullOrEmpty()) {
+                when (val apiResult = remoteDataSource.filterByAlcoholic(filter.alcoholic)) {
+                    is Resource.Success -> {
+                        val cocktails = CocktailMapper.mapDrinkListResponseToCocktails(apiResult.data)
+                        if (resultCocktails == null) {
+                            resultCocktails = cocktails
+                        } else {
+                            // Intersect with previous results - only keep cocktails that match all filters
+                            resultCocktails = resultCocktails.filter { existing ->
+                                cocktails.any { it.id == existing.id }
+                            }
+                        }
+                        fetchedAny = true
+                    }
+                    is Resource.Error -> {
+                        if (!fetchedAny) { // Only emit error if no other filter was successful
+                            emit(apiResult)
+                            return@flow
+                        }
+                        // Otherwise continue with partial results
+                    }
+                    else -> {}
+                }
+            }
+            
+            // Cache the results
+            if (!resultCocktails.isNullOrEmpty()) {
+                val entities = EntityMapper.mapCocktailsToEntities(resultCocktails)
+                localDataSource.saveCocktails(entities)
+            }
+            
+            emit(Resource.Success(resultCocktails ?: emptyList()))
+        } catch (e: Exception) {
+            emit(Resource.error(ApiError.notFoundError("An unexpected error occurred: ${e.message}")))
         }
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -22,19 +23,17 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -50,6 +49,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.nguyenmoclam.cocktailrecipes.ui.base.BaseScreen
 import com.nguyenmoclam.cocktailrecipes.ui.components.CocktailListItem
 import com.nguyenmoclam.cocktailrecipes.ui.components.CocktailListLoadingPlaceholder
 import com.nguyenmoclam.cocktailrecipes.ui.components.SearchBar
@@ -58,6 +58,7 @@ import com.nguyenmoclam.cocktailrecipes.ui.components.SearchBar
 @Composable
 fun SearchScreen(
     onCocktailClick: (String) -> Unit,
+    onFilterClick: () -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -69,7 +70,9 @@ fun SearchScreen(
     // State for controlling the LazyColumn scroll position
     val listState = rememberLazyListState()
 
-    Scaffold(
+    // Sử dụng BaseScreen với BaseViewModel để có xử lý Rate Limit
+    BaseScreen(
+        viewModel = viewModel,
         topBar = {
             CenterAlignedTopAppBar(
                 title = { 
@@ -78,6 +81,14 @@ fun SearchScreen(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
+                },
+                actions = {
+                    IconButton(onClick = onFilterClick) {
+                        Icon(
+                            imageVector = Icons.Default.FilterAlt,
+                            contentDescription = "Advanced Filters"
+                        )
+                    }
                 }
             )
         }
@@ -105,17 +116,34 @@ fun SearchScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    FilterChip(
-                        selected = isSearchByIngredient,
-                        onClick = { viewModel.toggleSearchByIngredient() },
-                        label = { Text(if (isSearchByIngredient) "By Ingredient" else "By Name") },
-                        leadingIcon = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        FilterChip(
+                            selected = isSearchByIngredient,
+                            onClick = { viewModel.toggleSearchByIngredient() },
+                            label = { Text(if (isSearchByIngredient) "By Ingredient" else "By Name") },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.List,
+                                    contentDescription = "Search Type"
+                                )
+                            }
+                        )
+                        
+                        TextButton(
+                            onClick = onFilterClick,
+                            modifier = Modifier.height(32.dp)
+                        ) {
                             Icon(
-                                imageVector = Icons.Default.List,
-                                contentDescription = "Filter"
+                                imageVector = Icons.Default.FilterAlt,
+                                contentDescription = "Advanced Filters"
                             )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("More Filters")
                         }
-                    )
+                    }
                     
                     AnimatedVisibility(
                         visible = searchHistory.isNotEmpty(),
@@ -123,7 +151,7 @@ fun SearchScreen(
                         exit = fadeOut()
                     ) {
                         TextButton(onClick = { viewModel.clearSearchHistory() }) {
-                            Text("Clear History")
+                            Text("Clear")
                             Icon(
                                 imageVector = Icons.Default.Clear,
                                 contentDescription = "Clear history"

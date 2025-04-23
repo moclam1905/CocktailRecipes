@@ -1,6 +1,9 @@
 package com.nguyenmoclam.cocktailrecipes.data.remote
 
+import com.nguyenmoclam.cocktailrecipes.data.model.AlcoholicListResponse
+import com.nguyenmoclam.cocktailrecipes.data.model.CategoryListResponse
 import com.nguyenmoclam.cocktailrecipes.data.model.DrinkListResponse
+import com.nguyenmoclam.cocktailrecipes.data.model.GlassListResponse
 import com.nguyenmoclam.cocktailrecipes.data.model.IngredientListResponse
 import com.nguyenmoclam.cocktailrecipes.data.model.IngredientNameListResponse
 import retrofit2.http.GET
@@ -53,4 +56,40 @@ interface CocktailApiService {
      */
     @GET("search.php")
     suspend fun getCocktailsByFirstLetter(@Query("f") firstLetter: String): DrinkListResponse
+    
+    /**
+     * Get a list of all available drink categories
+     */
+    @GET("list.php")
+    suspend fun getCategoryList(@Query("c") list: String = "list"): CategoryListResponse
+    
+    /**
+     * Get a list of all available glass types
+     */
+    @GET("list.php")
+    suspend fun getGlassList(@Query("g") list: String = "list"): GlassListResponse
+    
+    /**
+     * Get a list of alcoholic filter options (Alcoholic, Non_Alcoholic, etc.)
+     */
+    @GET("list.php")
+    suspend fun getAlcoholicList(@Query("a") list: String = "list"): AlcoholicListResponse
+    
+    /**
+     * Filter cocktails by category
+     */
+    @GET("filter.php")
+    suspend fun filterByCategory(@Query("c") category: String): DrinkListResponse
+    
+    /**
+     * Filter cocktails by glass type
+     */
+    @GET("filter.php")
+    suspend fun filterByGlass(@Query("g") glass: String): DrinkListResponse
+    
+    /**
+     * Filter cocktails by alcoholic/non-alcoholic
+     */
+    @GET("filter.php")
+    suspend fun filterByAlcoholic(@Query("a") alcoholic: String): DrinkListResponse
 }

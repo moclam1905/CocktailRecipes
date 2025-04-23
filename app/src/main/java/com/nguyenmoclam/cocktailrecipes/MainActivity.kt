@@ -1,5 +1,6 @@
 package com.nguyenmoclam.cocktailrecipes
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -7,7 +8,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -68,6 +73,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @OptIn(ExperimentalAnimationApi::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun CocktailApp(
     networkMonitor: NetworkMonitor,
@@ -78,15 +84,28 @@ fun CocktailApp(
         .collectAsState(initial = !networkMonitor.isCurrentlyOnline())
         .let { state -> remember { derivedStateOf { !state.value } } }
     
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Main app content
-        AppNavigation()
-        
-        // Offline indicator at the top of the screen
-        OfflineIndicator(
-            isOffline = isOffline,
-            onSyncClick = onSyncRequest,
-            modifier = Modifier.align(Alignment.TopCenter)
-        )
+    // Create a SnackbarHostState to display snackbar messages app-wide
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                //.padding(paddingValues)
+        ) {
+            // Main app content
+            AppNavigation(snackbarHostState = snackbarHostState)
+
+            // Offline indicator at the top of the screen
+            OfflineIndicator(
+                isOffline = isOffline,
+                onSyncClick = onSyncRequest,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
+        }
     }
 }

@@ -1,7 +1,11 @@
 package com.nguyenmoclam.cocktailrecipes.domain.repository
 
 import com.nguyenmoclam.cocktailrecipes.data.common.Resource
+import com.nguyenmoclam.cocktailrecipes.domain.model.AlcoholicFilter
+import com.nguyenmoclam.cocktailrecipes.domain.model.Category
 import com.nguyenmoclam.cocktailrecipes.domain.model.Cocktail
+import com.nguyenmoclam.cocktailrecipes.domain.model.CocktailFilter
+import com.nguyenmoclam.cocktailrecipes.domain.model.Glass
 import com.nguyenmoclam.cocktailrecipes.domain.model.IngredientItem
 import kotlinx.coroutines.flow.Flow
 
@@ -109,4 +113,45 @@ interface CocktailRepository {
      * @param ingredientName The name of the ingredient to filter by
      */
     suspend fun getCocktailsByIngredient(ingredientName: String): Flow<Resource<List<Cocktail>>>
+    
+    /**
+     * Get a list of cocktails by first letter
+     * @param letter The first letter to filter by
+     */
+    suspend fun getCocktailsByFirstLetter(letter: String): Flow<Resource<List<Cocktail>>>
+    
+    /**
+     * Get a list of all available drink categories
+     */
+    suspend fun getAllCategories(): Flow<Resource<List<Category>>>
+    
+    /**
+     * Get a list of all available glass types
+     */
+    suspend fun getAllGlassTypes(): Flow<Resource<List<Glass>>>
+    
+    /**
+     * Get a list of all alcoholic filter options
+     */
+    suspend fun getAllAlcoholicFilters(): Flow<Resource<List<AlcoholicFilter>>>
+    
+    /**
+     * Filter cocktails by category
+     */
+    suspend fun getCocktailsByCategory(category: String): Flow<Resource<List<Cocktail>>>
+    
+    /**
+     * Filter cocktails by glass type
+     */
+    suspend fun getCocktailsByGlassType(glass: String): Flow<Resource<List<Cocktail>>>
+    
+    /**
+     * Filter cocktails by alcoholic/non-alcoholic
+     */
+    suspend fun getCocktailsByAlcoholicFilter(alcoholic: String): Flow<Resource<List<Cocktail>>>
+    
+    /**
+     * Filter cocktails by combination of filters
+     */
+    suspend fun getCocktailsByFilter(filter: CocktailFilter): Flow<Resource<List<Cocktail>>>
 } 

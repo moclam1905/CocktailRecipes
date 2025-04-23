@@ -5,7 +5,11 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -14,6 +18,7 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.nguyenmoclam.cocktailrecipes.ui.analytics.ApiPerformanceDashboard
 import com.nguyenmoclam.cocktailrecipes.ui.detail.CocktailDetailScreen
 import com.nguyenmoclam.cocktailrecipes.ui.favorites.FavoritesScreen
+import com.nguyenmoclam.cocktailrecipes.ui.filter.FilterScreen
 import com.nguyenmoclam.cocktailrecipes.ui.home.HomeScreen
 import com.nguyenmoclam.cocktailrecipes.ui.ingredients.IngredientExplorerScreen
 import com.nguyenmoclam.cocktailrecipes.ui.search.SearchScreen
@@ -27,6 +32,7 @@ object NavDestinations {
     const val SETTINGS = "settings"
     const val API_DASHBOARD = "api_dashboard"
     const val INGREDIENT_EXPLORER = "ingredient_explorer"
+    const val FILTER = "filter"
     const val COCKTAIL_ID_ARG = "cocktailId"
 }
 
@@ -36,7 +42,8 @@ private const val TRANSITION_DURATION = 500
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AppNavigation(
-    startDestination: String = NavDestinations.HOME
+    startDestination: String = NavDestinations.HOME,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
     val navController = rememberAnimatedNavController()
     
@@ -86,6 +93,9 @@ fun AppNavigation(
                 },
                 onIngredientExplorerClick = {
                     navController.navigate(NavDestinations.INGREDIENT_EXPLORER)
+                },
+                onFilterClick = {
+                    navController.navigate(NavDestinations.FILTER)
                 }
             )
         }
@@ -96,6 +106,9 @@ fun AppNavigation(
             SearchScreen(
                 onCocktailClick = { cocktailId ->
                     navController.navigate("${NavDestinations.COCKTAIL_DETAIL}/$cocktailId")
+                },
+                onFilterClick = {
+                    navController.navigate(NavDestinations.FILTER)
                 }
             )
         }
@@ -141,6 +154,19 @@ fun AppNavigation(
             route = NavDestinations.INGREDIENT_EXPLORER
         ) {
             IngredientExplorerScreen(
+                onBackPressed = {
+                    navController.popBackStack()
+                },
+                onCocktailClick = { cocktailId ->
+                    navController.navigate("${NavDestinations.COCKTAIL_DETAIL}/$cocktailId")
+                }
+            )
+        }
+        
+        composable(
+            route = NavDestinations.FILTER
+        ) {
+            FilterScreen(
                 onBackPressed = {
                     navController.popBackStack()
                 },

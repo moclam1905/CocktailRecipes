@@ -17,20 +17,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTag
-import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.nguyenmoclam.cocktailrecipes.domain.model.Cocktail
 import com.nguyenmoclam.cocktailrecipes.domain.model.Ingredient
+import com.nguyenmoclam.cocktailrecipes.ui.base.BaseScreen
 import com.nguyenmoclam.cocktailrecipes.ui.components.CocktailImage
 import com.nguyenmoclam.cocktailrecipes.ui.components.PulsatingLoadingIndicator
-import com.nguyenmoclam.cocktailrecipes.ui.util.createSharedElementKey
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -39,13 +33,14 @@ fun CocktailDetailScreen(
     cocktailId: String,
     onBackPressed: () -> Unit
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.uiState.collectAsState()
     
     LaunchedEffect(cocktailId) {
-        viewModel.loadCocktailDetails(cocktailId)
+        viewModel.handleEvent(CocktailDetailViewModel.UiEvent.LoadCocktailDetails(cocktailId))
     }
     
-    Scaffold(
+    BaseScreen(
+        viewModel = viewModel,
         topBar = {
             SmallTopAppBar(
                 title = { Text("Cocktail Details") },
@@ -79,7 +74,10 @@ fun CocktailDetailScreen(
                 ) {
                     DetailContent(
                         cocktail = cocktail,
-                        modifier = Modifier.padding(paddingValues)
+                        modifier = Modifier.padding(paddingValues),
+                        onToggleFavorite = {
+                            viewModel.handleEvent(CocktailDetailViewModel.UiEvent.ToggleFavorite(cocktail))
+                        }
                     )
                 }
             }
@@ -90,7 +88,20 @@ fun CocktailDetailScreen(
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Error: ${uiState.message}")
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text("Error: ${uiState.message}")
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = { 
+                                viewModel.handleEvent(CocktailDetailViewModel.UiEvent.Refresh(cocktailId)) 
+                            }
+                        ) {
+                            Text("Retry")
+                        }
+                    }
                 }
             }
         }
@@ -100,7 +111,8 @@ fun CocktailDetailScreen(
 @Composable
 private fun DetailContent(
     cocktail: Cocktail,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onToggleFavorite: () -> Unit = {}
 ) {
     Column(
         modifier = modifier

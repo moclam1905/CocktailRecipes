@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shuffle
@@ -30,17 +31,29 @@ import com.nguyenmoclam.cocktailrecipes.domain.model.Cocktail
 import com.nguyenmoclam.cocktailrecipes.domain.model.Ingredient
 import com.nguyenmoclam.cocktailrecipes.ui.components.*
 import com.nguyenmoclam.cocktailrecipes.ui.theme.CocktailRecipesTheme
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.nguyenmoclam.cocktailrecipes.ui.util.ShakeDetector
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Nightlife
+import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.zIndex
+import kotlinx.coroutines.delay
+import androidx.compose.foundation.interaction.MutableInteractionSource
 
 /**
  * Home screen displaying the list of popular cocktails with pull-to-refresh
@@ -54,6 +67,7 @@ fun HomeScreen(
     onFavoritesClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onIngredientExplorerClick: () -> Unit,
+    onFilterClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -122,16 +136,40 @@ fun HomeScreen(
                 )
             },
             floatingActionButton = {
-                // "Surprise Me" floating action button
+                // "Surprise Me" floating action button with animation
+                val scale = remember { Animatable(1f) }
+                LaunchedEffect(key1 = Unit) {
+                    // Slight pulsing animation to draw attention to the FAB
+                    while(true) {
+                        scale.animateTo(
+                            targetValue = 1.05f,
+                            animationSpec = tween(700, easing = LinearOutSlowInEasing)
+                        )
+                        scale.animateTo(
+                            targetValue = 1f,
+                            animationSpec = tween(700, easing = LinearOutSlowInEasing)
+                        )
+                        delay(2000) // Delay between pulses
+                    }
+                }
+                
                 FloatingActionButton(
                     onClick = { viewModel.handleEvent(HomeEvent.GetRandomCocktail) },
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    modifier = Modifier.scale(scale.value)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Shuffle,
-                        contentDescription = "Surprise Me"
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Shuffle,
+                            contentDescription = "Random Cocktail"
+                        )
+                        Spacer( modifier = Modifier.width(8.dp))
+                        Text("Surprise Me")
+                    }
                 }
             }
         ) { paddingValues ->
@@ -174,77 +212,138 @@ fun HomeScreen(
                                 start = 16.dp, 
                                 end = 16.dp, 
                                 top = 16.dp,
-                                bottom = 80.dp // Add extra padding for the FAB
+                                bottom = 88.dp // Add extra padding for the FAB
                             ),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            // Feature Cards
+                            // Feature Chips Section
                             item {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                // Feature buttons row with animation
+                                AnimatedVisibility(
+                                    visible = true,
+                                    enter = fadeIn() + expandVertically(),
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    FeatureCard(
-                                        title = "Ingredients",
-                                        icon = Icons.Default.Science,
-                                        backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                                        modifier = Modifier.weight(1f),
-                                        onClick = onIngredientExplorerClick
-                                    )
-                                    
-                                    FeatureCard(
-                                        title = "Favorites",
-                                        icon = Icons.Default.Favorite,
-                                        backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
-                                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                        modifier = Modifier.weight(1f),
-                                        onClick = onFavoritesClick
-                                    )
-                                }
-                            }
-                            
-                            // "Shake for a random cocktail" tip
-                            item {
-                                Card(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.secondaryContainer
-                                    )
-                                ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                                    Card(
+                                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                        shape = RoundedCornerShape(16.dp),
+                                        modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Shuffle,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onSecondaryContainer
-                                        )
-                                        Spacer(modifier = Modifier.width(16.dp))
-                                        Text(
-                                            text = "Shake your device for a random cocktail!",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSecondaryContainer
-                                        )
+                                        Column(
+                                            modifier = Modifier.padding(16.dp),
+                                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                                        ) {
+                                            Text(
+                                                text = "Explore",
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                            
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                FeatureChip(
+                                                    title = "Ingredients",
+                                                    icon = Icons.Default.Science,
+                                                    backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                                                    modifier = Modifier.weight(1f),
+                                                    onClick = onIngredientExplorerClick
+                                                )
+                                                
+                                                FeatureChip(
+                                                    title = "Favorites",
+                                                    icon = Icons.Default.Favorite,
+                                                    backgroundColor = MaterialTheme.colorScheme.errorContainer,
+                                                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                                                    modifier = Modifier.weight(1f),
+                                                    onClick = onFavoritesClick
+                                                )
+                                                
+                                                FeatureChip(
+                                                    title = "Filter",
+                                                    icon = Icons.Default.FilterAlt,
+                                                    backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                    modifier = Modifier.weight(1f),
+                                                    onClick = onFilterClick
+                                                )
+                                            }
+                                            
+                                            // Shake tip now as a small, subtle hint
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(top = 4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Shuffle,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.tertiary,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Text(
+                                                    text = "Tip: Shake device for a random cocktail",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.tertiary
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
 
-                            // Cocktail list
+                            // Header for Popular Cocktails
+                            item {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Nightlife,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "Popular Cocktails",
+                                        style = MaterialTheme.typography.titleLarge,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+
+                            // Cocktail list with animated entrance
                             items(
                                 items = uiState.cocktails,
                                 key = { it.id }
                             ) { cocktail ->
-                                CocktailListItem(
-                                    cocktail = cocktail,
-                                    onClick = { onCocktailClick(cocktail.id) },
-                                    onFavoriteClick = { 
-                                        viewModel.handleEvent(HomeEvent.ToggleFavorite(cocktail.id)) 
-                                    }
-                                )
+                                AnimatedVisibility(
+                                    visible = true,
+                                    enter = fadeIn(initialAlpha = 0.3f) + 
+                                            expandVertically(
+                                                expandFrom = Alignment.Top,
+                                                animationSpec = spring(
+                                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                    stiffness = Spring.StiffnessLow
+                                                )
+                                            )
+                                ) {
+                                    CocktailListItem(
+                                        cocktail = cocktail,
+                                        onClick = { onCocktailClick(cocktail.id) },
+                                        onFavoriteClick = { 
+                                            viewModel.handleEvent(HomeEvent.ToggleFavorite(cocktail.id)) 
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
@@ -260,8 +359,12 @@ fun HomeScreen(
             }
         }
         
-        // Random Cocktail Dialog
-        if (uiState.showRandomCocktail) {
+        // Random Cocktail Dialog with animated entry
+        AnimatedVisibility(
+            visible = uiState.showRandomCocktail,
+            enter = fadeIn() + scaleIn(),
+            exit = fadeOut() + scaleOut()
+        ) {
             Dialog(
                 onDismissRequest = { viewModel.handleEvent(HomeEvent.DismissRandomCocktail) }
             ) {
@@ -293,48 +396,14 @@ fun HomeScreenPreview() {
             onSearchClick = {},
             onFavoritesClick = {},
             onSettingsClick = {},
-            onIngredientExplorerClick = {}
+            onIngredientExplorerClick = {},
+            onFilterClick = {}
         )
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun HomeScreenContentPreview() {
-    val cocktails = listOf(
-        Cocktail(
-            id = "1",
-            name = "Mojito",
-            imageUrl = "",
-            instructions = "Mix ingredients...",
-            ingredients = listOf(
-                Ingredient("White Rum", "2 oz"),
-                Ingredient("Lime Juice", "1 oz"),
-                Ingredient("Mint Leaves", "6 leaves")
-            ),
-            isFavorite = false
-        ),
-        Cocktail(
-            id = "2",
-            name = "Margarita",
-            imageUrl = "",
-            instructions = "Mix ingredients...",
-            ingredients = listOf(
-                Ingredient("Tequila", "2 oz"),
-                Ingredient("Triple Sec", "1 oz"),
-                Ingredient("Lime Juice", "1 oz")
-            ),
-            isFavorite = true
-        )
-    )
-    
-    CocktailRecipesTheme {
-        // Preview content
-    }
-}
-
-@Composable
-fun FeatureCard(
+fun FeatureChip(
     title: String,
     icon: ImageVector,
     backgroundColor: Color,
@@ -342,31 +411,38 @@ fun FeatureCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    val interactionSource = remember { MutableInteractionSource() }
+    
+    Surface(
+        shape = RoundedCornerShape(28.dp),
+        color = backgroundColor,
         modifier = modifier
-            .height(120.dp)
-            .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = backgroundColor,
-            contentColor = contentColor
-        )
+            .height(50.dp)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = rememberRipple(bounded = true, color = contentColor.copy(alpha = 0.2f)),
+                onClick = onClick
+            )
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = title,
-                modifier = Modifier.size(40.dp)
+                tint = contentColor,
+                modifier = Modifier.size(20.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = contentColor,
+                fontWeight = FontWeight.Medium
             )
         }
     }

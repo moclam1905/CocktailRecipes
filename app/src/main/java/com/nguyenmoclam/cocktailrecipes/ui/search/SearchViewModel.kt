@@ -1,10 +1,10 @@
 package com.nguyenmoclam.cocktailrecipes.ui.search
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nguyenmoclam.cocktailrecipes.data.common.Resource
 import com.nguyenmoclam.cocktailrecipes.domain.model.Cocktail
 import com.nguyenmoclam.cocktailrecipes.domain.repository.CocktailRepository
+import com.nguyenmoclam.cocktailrecipes.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -37,7 +37,7 @@ data class CocktailMinimalInfo(
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val repository: CocktailRepository
-) : ViewModel() {
+) : BaseViewModel<SearchUIState, SearchUiEvent>(SearchUIState.Initial) {
 
     // Search query state
     private val _searchQuery = MutableStateFlow("")
@@ -51,16 +51,24 @@ class SearchViewModel @Inject constructor(
     private val _isSearchByIngredient = MutableStateFlow(false)
     val isSearchByIngredient = _isSearchByIngredient.asStateFlow()
 
-    // UI state for search results - Primary state source for the UI
-    private val _uiState = MutableStateFlow<SearchUIState>(SearchUIState.Initial)
-    val uiState: StateFlow<SearchUIState> = _uiState.asStateFlow()
-
     // Recently viewed cocktails state
     private val _recentlyViewedCocktails = MutableStateFlow<List<CocktailMinimalInfo>>(emptyList())
     val recentlyViewedCocktails = _recentlyViewedCocktails.asStateFlow()
 
     init {
         observeSearchQuery()
+    }
+
+    override suspend fun processEvent(event: SearchUiEvent) {
+        when (event) {
+            is SearchUiEvent.SearchQueryChanged -> onSearchQueryChange(event.query)
+            is SearchUiEvent.ToggleSearchType -> toggleSearchByIngredient()
+            is SearchUiEvent.AddToHistory -> addToSearchHistory(event.query)
+            is SearchUiEvent.ClearHistory -> clearSearchHistory()
+            is SearchUiEvent.SaveFavorite -> saveFavorite(event.cocktail)
+            is SearchUiEvent.RemoveFavorite -> removeFavorite(event.id)
+            is SearchUiEvent.AddToRecentlyViewed -> addToRecentlyViewed(event.cocktail)
+        }
     }
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
@@ -73,7 +81,7 @@ class SearchViewModel @Inject constructor(
         }.onEach { (query, _) ->
             // Show loading state immediately when query is not blank
             if (query.isNotBlank()) {
-                _uiState.value = SearchUIState.Loading
+                updateState { SearchUIState.Loading }
             }
         }.flatMapLatest { (query, isByIngredient) ->
             if (query.isBlank()) {
@@ -88,24 +96,32 @@ class SearchViewModel @Inject constructor(
                 }
                 // Add error handling within the search flow
                 searchFlow.catch { e -> 
+                    // Check for rate limit errors first
+                    handleApiError(e)
                     emit(Resource.error("Search failed: ${e.message}")) 
                 }
             }
         }.onEach { resource ->
             // Map the Resource result to the appropriate SearchUIState
-            _uiState.value = when (resource) {
-                is Resource.Loading -> SearchUIState.Loading // Should ideally not happen here due to outer loading state, but handle defensively
-                is Resource.Success -> {
-                    val cocktails = resource.data ?: emptyList()
-                    if (cocktails.isEmpty() && searchQuery.value.isNotBlank()) {
-                        SearchUIState.Empty // Search was performed but no results
-                    } else if (cocktails.isEmpty() && searchQuery.value.isBlank()){
-                        SearchUIState.Initial // Query is blank, show initial state
-                    } else {
-                        SearchUIState.Success(cocktails)
+            updateState { 
+                when (resource) {
+                    is Resource.Loading -> SearchUIState.Loading
+                    is Resource.Success -> {
+                        val cocktails = resource.data ?: emptyList()
+                        if (cocktails.isEmpty() && searchQuery.value.isNotBlank()) {
+                            SearchUIState.Empty // Search was performed but no results
+                        } else if (cocktails.isEmpty() && searchQuery.value.isBlank()){
+                            SearchUIState.Initial // Query is blank, show initial state
+                        } else {
+                            SearchUIState.Success(cocktails)
+                        }
+                    }
+                    is Resource.Error -> {
+                        // Check for rate limit errors
+                        resource.apiError.throwable?.let { handleApiError(it) }
+                        SearchUIState.Error(resource.apiError.message ?: "Unknown error during search")
                     }
                 }
-                is Resource.Error -> SearchUIState.Error(resource.apiError.message ?: "Unknown error during search")
             }
         }.launchIn(viewModelScope) // Collect the flow within the ViewModel's scope
     }
@@ -182,4 +198,15 @@ sealed class SearchUIState {
     data class Success(val cocktails: List<Cocktail>) : SearchUIState() // Search successful with results
     data object Empty : SearchUIState() // Search successful but no results found
     data class Error(val message: String) : SearchUIState() // Search failed
+}
+
+// UI events for search
+sealed class SearchUiEvent {
+    data class SearchQueryChanged(val query: String) : SearchUiEvent()
+    data object ToggleSearchType : SearchUiEvent()
+    data class AddToHistory(val query: String) : SearchUiEvent()
+    data object ClearHistory : SearchUiEvent()
+    data class SaveFavorite(val cocktail: Cocktail) : SearchUiEvent()
+    data class RemoveFavorite(val id: String) : SearchUiEvent()
+    data class AddToRecentlyViewed(val cocktail: Cocktail) : SearchUiEvent()
 } 
